@@ -19,6 +19,8 @@ WELCOME_PROMPT  LEA     WELCOME_MESSAGE,    A1  ; Load Welcome Message Into A1
 *----------------Variables and Constants----------------*
 
 WELCOME_MESSAGE     DC.B    'Welcome to 68k disassembler!', 0
+START_ADR_PROMPT    DC.B    'Please Enter The Starting Address', 0
+END_ADR_PROMPT      DC.B    'Please Enter The Ending Adress', 0
 
 *----------------END----------------*
 
