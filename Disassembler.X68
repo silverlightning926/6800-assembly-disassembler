@@ -1,20 +1,28 @@
-*---------------------------------------------------------------------------------------
+*---------------------------------------------------------------------------------------*
 * Title      : 68K Disassembler
 * Written by : Arkar Swar, Sidd Rao, Thinh Dang
 * Date       : 05/16/2022
 * Description: A 68K Disassembler that converts a memory image to 68K instructions
-*---------------------------------------------------------------------------------------
-    ORG    $1000
-START:                  ; first instruction of program
+*---------------------------------------------------------------------------------------*
 
-* Put program code here
+    ORG    $1000                                ; Origin $1000
+    
+START:
+    
+WELCOME_PROMPT  LEA     WELCOME_MESSAGE,    A1  ; Load Welcome Message Into A1
+                MOVE.B  #13,                D0  ; Move #13 into D0           
+                TRAP    #15                     ; Trap #15                         
+                
 
-    SIMHALT             ; halt simulator
+    SIMHALT                                     ; Halt Simulator
 
-* Put variables and constants here
+*----------------Variables and Constants----------------*
 
-    END    START        ; last line of source
+WELCOME_MESSAGE     DC.B    'Welcome to 68k disassembler!', 0
 
+*----------------END----------------*
+
+    END    START
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
