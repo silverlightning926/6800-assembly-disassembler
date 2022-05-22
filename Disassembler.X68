@@ -79,7 +79,9 @@ READ_OPCODE     CLR.L          D3                            * WE WILL STORE EAC
                 
 *------------------------- DECODE OPCODE -----------------------------------               
 
-                MOVE.L          D3, D7
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3       
                 
                 CMP.B           #$0D, D3
                 BEQ             ADD_OPCODE
