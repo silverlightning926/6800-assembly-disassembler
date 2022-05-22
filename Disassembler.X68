@@ -111,7 +111,7 @@ READ_OPCODE     JSR            PRINT_MEM_ADDR
                 BEQ             MOVEL_MOVEAL_OPCODE
                 
                 CMP.B           #$06, D3
-                BEQ             BCC_BGT_BLE_OPCODE
+                BEQ             BCC_OPCODE
                 
                 CMP.B           #$4, D3
                 BEQ             LEA_JSR_RTS_MOVEM_OPCODE
@@ -175,8 +175,8 @@ MOVEL_MOVEAL_OPCODE
                 TRAP           #15
                 BRA            AFTER_OPCODE_DECODE
                 
-BCC_BGT_BLE_OPCODE  
-                LEA            BCC_BGT_BLE_OPCODE_STRING, A1
+BCC_OPCODE  
+                LEA            BCC_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
                 BRA            AFTER_OPCODE_DECODE
@@ -390,7 +390,7 @@ AND_OPCODE_STRING               DC.B 'AND',0
 MOVEB_OPCODE_STRING             DC.B 'MOVE.B',0
 MOVEW_MOVEAW_OPCODE_STRING      DC.B 'MOVEW/MOVEAW',0
 MOVEL_MOVEAL_OPCODE_STRING      DC.B 'MOVEL/MOVEEAL',0
-BCC_BGT_BLE_OPCODE_STRING       DC.B 'BCC/BGT/BLE',0
+BCC_OPCODE_STRING               DC.B 'BCC (BGT, BLE, BEQ)',0
 LEA_JSR_RTS_MOVEM_OPCODE_STRING DC.B 'LEA/JSR/RTS/MOVEM',0
 LSL_ASR_OPCODE_STRING           DC.B 'LSL/ASR',0
 
