@@ -118,73 +118,73 @@ INVALID_OPCODE
                 LEA            INVALID_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
     
 ADD_OPCODE  
                 LEA            ADD_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15  
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
     
 CMP_OPCODE  
                 LEA            CMP_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
 
 OR_OPCODE  
                 LEA            OR_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
 
 SUB_OPCODE  
                 LEA            SUB_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
 
 AND_OPCODE  
                 LEA            AND_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
 
 MOVEB_OPCODE  
                 LEA            MOVEB_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
                 
 MOVEW_MOVEAW_OPCODE  
                 LEA            MOVEW_MOVEAW_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
         
 MOVEL_MOVEAL_OPCODE  
                 LEA            MOVEL_MOVEAL_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
                 
 BCC_BGT_BLE_OPCODE  
                 LEA            BCC_BGT_BLE_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
                 
 LEA_JSR_RTS_MOVEM_OPCODE  
                 LEA            LEA_JSR_RTS_MOVEM_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
 
 LSL_ASR_OPCODE  
                 LEA            LSL_ASR_OPCODE_STRING, A1
                 MOVE.B         #14, D0
                 TRAP           #15
-                BRA            AFTER_OPCODE_CHECK
+                BRA            AFTER_OPCODE_DECODE
 
 *------------------------------- EA ---------------------------------------- 
 
@@ -244,6 +244,7 @@ LEA_JSR_RTS_MOVEM_OPCODE_STRING DC.B 'LEA/JSR/RTS/MOVEM',0
 LSL_ASR_OPCODE_STRING           DC.B 'LSL/ASR',0
 
                 END    START
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
