@@ -1,6 +1,6 @@
 *-----------------------------------------------------------
 * Title      : Final Project
-* Written by : Arkar Kyaw Swar, 
+* Written by : Group 4 - Arkar Kyaw Swar, Siddharth Rao, Eric Dang
 * Date       : 06/02/2022
 * Description: Disassembler
 *-----------------------------------------------------------
