@@ -71,7 +71,7 @@ RETURN          RTS
 NEXT            MOVE.L          D5, A3
                 MOVE.L          D6, A4
 
-GET_OPCODE      LEA             NEWLINE, A1
+GET_OPCODE      LEA             STRINGSPACE, A1
                 MOVE.B          #13, D0
                 TRAP            #15
                 
@@ -261,7 +261,7 @@ STRINGD	        DC.B	        'D',0
 STRINGE	        DC.B	        'E',0
 STRINGF	        DC.B	        'F',0
 
-NEWLINE         DC.W            ' ',0
+STRINGSPACE         DC.W            ' ',0
 
 ZERO		    LEA		        STRING0, A1
 			    BRA		        PRINT_NUM
