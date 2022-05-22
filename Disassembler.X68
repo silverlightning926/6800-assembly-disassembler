@@ -74,6 +74,7 @@ RETURN          RTS
 MAIN            MOVEA.L        D5, A2                        * START READING FROM D5(STARTING ADDRESS)            
                 
 READ_OPCODE     JSR            PRINT_MEM_ADDR
+                JSR            PRINT_SPACE
                 CLR.L          D3                            * WE WILL STORE EACH WORD FROM CURRENT INSTRUCTION IN D3
                 CMP.W          A2, D6
                 BLT            EXIT_MAIN_LOOP                                                              
@@ -201,9 +202,7 @@ AFTER_OPCODE_DECODE
 
 *NOTE: WE NEED A CHECK HERE IF WE WANT TO STOP THE LOOP
 
-               LEA            STR_SPACE, A1 ; NEW LINE PRINT FOR OPCODE DECODING TESTING
-               MOVE.B         #13, D0       ; REMOVE WHEN WORKING ON IO
-               TRAP           #15
+                JSR            PRINT_NEWLINE
 
 NEXT_INSTRUC    BRA            READ_OPCODE                   * IF DONE PRINTING INSTRUCTION AND THERE ARE MORE, READ ANOTHER 
 
@@ -310,7 +309,17 @@ PRINT_LOOP      CMPI.B	        #$30, D3
 			    
 PRINT_NUM	    MOVE	        #14, D0
 			    TRAP	        #15
-			    RTS 
+			    RTS
+
+PRINT_SPACE     LEA            STR_SPACE, A1
+                MOVE.B         #14, D0
+                TRAP           #15
+                RTS
+
+PRINT_NEWLINE   LEA            STR_SPACE, A1
+                MOVE.B         #13, D0
+                TRAP           #15
+                RTS
 
 PROMPT1	        DC.B 'Please enter the starting memory address in hexadecimal (Longword) form: ',0
 EXTRA1          DC.B '         ', 0
