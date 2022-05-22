@@ -4,6 +4,7 @@
 * Date       : 06/02/2022
 * Description: Disassembler
 *-----------------------------------------------------------
+HEXBITS         EQU            $700
 CR              EQU            $0D               
 LF              EQU            $0A          
  
@@ -72,7 +73,8 @@ RETURN          RTS
 
 MAIN            MOVEA.L        D5, A2                        * START READING FROM D5(STARTING ADDRESS)            
                 
-READ_OPCODE     CLR.L          D3                            * WE WILL STORE EACH WORD FROM CURRENT INSTRUCTION IN D3
+READ_OPCODE     JSR            PRINT_MEM_ADDR
+                CLR.L          D3                            * WE WILL STORE EACH WORD FROM CURRENT INSTRUCTION IN D3
                 CMP.W          A2, D6
                 BLT            EXIT_MAIN_LOOP                                                              
                 MOVE.W         (A2)+, D3                     * RETRIEVE OPCODE OF CURRENT INSTRUCTION
@@ -222,7 +224,93 @@ EXIT_MAIN_LOOP  LEA            PROMPT3, A1                  * ASK USER IF THEY W
                 MOVE.B         #14, D0                      * DISPLAY GOODBYE
                 TRAP           #15                
                 
-                SIMHALT    
+                SIMHALT
+                
+PRINT_MEM_ADDR  MOVE.L          A2, HEXBITS      
+                JSR             HEX_TO_STRING			
+    							
+                MOVE.W          A2, HEXBITS   		
+                JSR             HEX_TO_STRING
+                RTS   
+                
+NUM_OR_LETTER   CMPI.B          #$09, D3
+                BLE             CONVERT_NUM
+                BRA             CONVERT_LETTER
+                
+HEX_TO_STRING   MOVE.W          HEXBITS, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                JSR             NUM_OR_LETTER
+
+                MOVE.W          HEXBITS, D3	 									 
+                LSL.L           #4, D3  
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3 
+                JSR             NUM_OR_LETTER
+
+                MOVE.W          HEXBITS, D3	 										 
+                LSL.L           #4, D3    
+                LSL.L           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3 
+                JSR             NUM_OR_LETTER
+    
+                MOVE.W          HEXBITS,D3										 
+                LSL.L           #4, D3        
+                LSL.L           #4, D3    
+                LSL.L           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3  
+                JSR             NUM_OR_LETTER       
+    
+                CLR.L           D3
+                RTS
+    
+CONVERT_NUM     ADDI.W          #$30, D3 
+                BRA             PRINT_LOOP
+CONVERT_LETTER  ADDI.W          #$37, D3
+                BRA             PRINT_LOOP
+
+PRINT_LOOP      CMPI.B	        #$30, D3
+			    BEQ		        ZERO
+			    CMPI.B	        #$31, D3
+			    BEQ		        ONE
+			    CMPI.B	        #$32, D3
+			    BEQ		        TWO
+			    CMPI.B	        #$33, D3
+			    BEQ		        THREE
+                CMPI.B	        #$34, D3
+			    BEQ		        FOUR
+			    CMPI.B	        #$35, D3
+			    BEQ		        FIVE
+			    CMPI.B	        #$36, D3
+			    BEQ		        SIX
+			    CMPI.B	        #$37, D3
+			    BEQ		        SEVEN
+			    CMPI.B	        #$38, D3
+			    BEQ		        EIGHT
+			    CMPI.B	        #$39, D3
+			    BEQ		        NINE
+			    CMPI.B	        #$41, D3
+			    BEQ		        A
+			    CMPI.B	        #$42, D3
+			    BEQ		        B
+			    CMPI.B	        #$43, D3
+			    BEQ		        C
+			    CMPI.B	        #$44, D3
+			    BEQ		        D
+			    CMPI.B	        #$45, D3
+			    BEQ		        E
+			    CMPI.B	        #$46, D3
+			    BEQ		        F   
+			    
+PRINT_NUM	    MOVE	        #14, D0
+			    TRAP	        #15
+			    RTS 
 
 PROMPT1	        DC.B 'Please enter the starting memory address in hexadecimal (Longword) form: ',0
 EXTRA1          DC.B '         ', 0
@@ -233,6 +321,56 @@ EXTRA3          DC.B '  ', 0
 GOODBYE	        DC.B 'Thank you for using our disassembler! Good Bye.',0
 
 STR_SPACE       DC.B ' ', 0
+
+STRING0	        DC.B	        '0',0
+STRING1	        DC.B	        '1',0
+STRING2	        DC.B	        '2',0
+STRING3	        DC.B	        '3',0
+STRING4	        DC.B	        '4',0
+STRING5	        DC.B	        '5',0
+STRING6	        DC.B	        '6',0
+STRING7	        DC.B	        '7',0
+STRING8	        DC.B	        '8',0
+STRING9	        DC.B	        '9',0
+STRINGA	        DC.B	        'A',0
+STRINGB	        DC.B	        'B',0
+STRINGC	        DC.B	        'C',0
+STRINGD	        DC.B	        'D',0
+STRINGE	        DC.B	        'E',0
+STRINGF	        DC.B	        'F',0
+
+ZERO		    LEA		        STRING0, A1
+			    BRA		        PRINT_NUM
+ONE		        LEA		        STRING1, A1
+			    BRA		        PRINT_NUM
+TWO		        LEA		        STRING2, A1
+			    BRA		        PRINT_NUM
+THREE		    LEA		        STRING3, A1
+			    BRA		        PRINT_NUM
+FOUR		    LEA		        STRING4, A1
+			    BRA		        PRINT_NUM
+FIVE		    LEA		        STRING5, A1
+			    BRA		        PRINT_NUM
+SIX		        LEA		        STRING6, A1
+			    BRA		        PRINT_NUM
+SEVEN		    LEA		        STRING7, A1
+			    BRA		        PRINT_NUM
+EIGHT		    LEA		        STRING8, A1
+			    BRA		        PRINT_NUM
+NINE		    LEA		        STRING9, A1
+			    BRA		        PRINT_NUM
+A		        LEA		        STRINGA, A1
+			    BRA		        PRINT_NUM
+B   		    LEA		        STRINGB, A1
+			    BRA		        PRINT_NUM
+C   		    LEA		        STRINGC, A1
+			    BRA		        PRINT_NUM
+D     		    LEA		        STRINGD, A1
+			    BRA		        PRINT_NUM
+E		        LEA		        STRINGE, A1
+			    BRA		        PRINT_NUM
+F   		    LEA		        STRINGF, A1
+			    BRA		        PRINT_NUM
 
 INVALID_OPCODE_STRING           DC.B 'Invalid Opcode',0
 ADD_OPCODE_STRING               DC.B 'ADD',0
@@ -248,6 +386,7 @@ LEA_JSR_RTS_MOVEM_OPCODE_STRING DC.B 'LEA/JSR/RTS/MOVEM',0
 LSL_ASR_OPCODE_STRING           DC.B 'LSL/ASR',0
 
                 END    START
+
 
 *~Font name~Courier New~
 *~Font size~10~
