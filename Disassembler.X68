@@ -1,6 +1,6 @@
 *-----------------------------------------------------------
 * Title      : Final Project
-* Written by : Arkar Kyaw Swar, Siddharth Rao 
+* Written by : Group #4 
 * Date       : 06/02/2022
 * Description: 68000 Disassembler
 *-----------------------------------------------------------
@@ -64,8 +64,6 @@ EXIT_LOOP       CMP.B          #0, D0
                 BNE            RETURN
                 MOVE.L         D6, D5
 RETURN          RTS
-* Here, we have starting address in D5 and ending address in D6 as hexadecimals
-
                 
 *----------------- READ ADDRESSES AND DECODE -------------------------------
   
@@ -80,30 +78,30 @@ GET_OPCODE      LEA             NEWLINE, A1
                 JSR             PRINT_MEM_ADDR
                 JSR             LOAD_NEXT
                 MOVE.W          HEXBITS, D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3
-                CMP.B           #$0D,D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                CMP.B           #$0D, D3
                 BEQ             ADD_OPCODE
-                CMP.B           #$0B,D3
+                CMP.B           #$0B, D3
                 BEQ             CMP_OPCODE
-                CMP.B           #$08,D3
+                CMP.B           #$08, D3
                 BEQ             OR_OPCODE
-                CMP.B           #$09,D3
+                CMP.B           #$09, D3
                 BEQ             SUB_OPCODE
-                CMP.B           #$0C,D3
+                CMP.B           #$0C, D3
                 BEQ             AND_OPCODE
-                CMP.B           #$01,D3
+                CMP.B           #$01, D3
                 BEQ             MOVEB_OPCODE
-                CMP.B           #$03,D3
+                CMP.B           #$03, D3
                 BEQ             MOVEW_MOVEAW_OPCODE
-                CMP.B           #$02,D3
+                CMP.B           #$02, D3
                 BEQ             MOVEL_MOVEAL_OPCODE
-                CMP.B           #$06,D3
+                CMP.B           #$06, D3
                 BEQ             BCC_BGT_BLE_OPCODE
-                CMP.B           #$4,D3
+                CMP.B           #$4, D3
                 BEQ             LEA_JSR_RTS_MOVEM_OPCODE
-                CMP.B           #$0E,D3
+                CMP.B           #$0E, D3
                 BEQ             LSL_ASR_OPCODE
                 
                 JSR             INVALID_OPCODE            
@@ -147,10 +145,10 @@ LSL_ASR_OPCODE
 
 LOAD_NEXT
                 MOVE.W          (A3)+, D3
-                MOVE.W          D3,HEXBITS
+                MOVE.W          D3, HEXBITS
                 CLR.L           D7
                 MOVE.W          D3, D7
-                CMPA.L          A3,A4
+                CMPA.L          A3, A4
                 BLE             END
                 RTS
     
@@ -169,134 +167,133 @@ NUM_OR_LETTER   CMPI.B          #$09, D3
                 BRA             CONVERT_LETTER
                 
 HEX_TO_STRING   MOVE.W          HEXBITS, D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
                 JSR             NUM_OR_LETTER
 
                 MOVE.W          HEXBITS, D3	 									 
-                LSL.L           #4,D3  
-                LSR.W           #4,D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3 
+                LSL.L           #4, D3  
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3 
                 JSR             NUM_OR_LETTER
 
                 MOVE.W          HEXBITS, D3	 										 
-                LSL.L           #4,D3    
-                LSL.L           #4,D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3 
+                LSL.L           #4, D3    
+                LSL.L           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3 
                 JSR             NUM_OR_LETTER
     
                 MOVE.W          HEXBITS,D3										 
-                LSL.L           #4,D3        
-                LSL.L           #4,D3    
-                LSL.L           #4,D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3
-                LSR.W           #4,D3  
+                LSL.L           #4, D3        
+                LSL.L           #4, D3    
+                LSL.L           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3
+                LSR.W           #4, D3  
                 JSR             NUM_OR_LETTER       
     
                 CLR.L           D3
                 RTS
     
-CONVERT_NUM     ADDI.W          #$30,D3 
+CONVERT_NUM     ADDI.W          #$30, D3 
                 BRA             PRINT_LOOP
-CONVERT_LETTER  ADDI.W          #$37,D3
+CONVERT_LETTER  ADDI.W          #$37, D3
                 BRA             PRINT_LOOP
 
-PRINT_LOOP      CMPI.B	        #$30,D3
+PRINT_LOOP      CMPI.B	        #$30, D3
 			    BEQ		        ZERO
-			    CMPI.B	        #$31,D3
+			    CMPI.B	        #$31, D3
 			    BEQ		        ONE
-			    CMPI.B	        #$32,D3
+			    CMPI.B	        #$32, D3
 			    BEQ		        TWO
-			    CMPI.B	        #$33,D3
+			    CMPI.B	        #$33, D3
 			    BEQ		        THREE
-                CMPI.B	        #$34,D3
+                CMPI.B	        #$34, D3
 			    BEQ		        FOUR
-			    CMPI.B	        #$35,D3
+			    CMPI.B	        #$35, D3
 			    BEQ		        FIVE
-			    CMPI.B	        #$36,D3
+			    CMPI.B	        #$36, D3
 			    BEQ		        SIX
-			    CMPI.B	        #$37,D3
+			    CMPI.B	        #$37, D3
 			    BEQ		        SEVEN
-			    CMPI.B	        #$38,D3
+			    CMPI.B	        #$38, D3
 			    BEQ		        EIGHT
-			    CMPI.B	        #$39,D3
+			    CMPI.B	        #$39, D3
 			    BEQ		        NINE
-			
-			    CMPI.B	        #$41,D3
+			    CMPI.B	        #$41, D3
 			    BEQ		        A
-			    CMPI.B	        #$42,D3
+			    CMPI.B	        #$42, D3
 			    BEQ		        B
-			    CMPI.B	        #$43,D3
+			    CMPI.B	        #$43, D3
 			    BEQ		        C
-			    CMPI.B	        #$44,D3
+			    CMPI.B	        #$44, D3
 			    BEQ		        D
-			    CMPI.B	        #$45,D3
+			    CMPI.B	        #$45, D3
 			    BEQ		        E
-			    CMPI.B	        #$46,D3
+			    CMPI.B	        #$46, D3
 			    BEQ		        F   
 			    
-PRINT_NUM	    MOVE	        #14,D0
+PRINT_NUM	    MOVE	        #14, D0
 			    TRAP	        #15
 			    RTS                               
 
 PROMPT1	        DC.B            'Please enter the starting memory address in hexadecimal (Longword) form: ',0
 PROMPT2	        DC.B            'Please enter the ending memory address in hexadecimal (Longword) form: ',0
 			
-PRT0	        DC.B	        '0',0
-PRT1	        DC.B	        '1',0
-PRT2	        DC.B	        '2',0
-PRT3	        DC.B	        '3',0
-PRT4	        DC.B	        '4',0
-PRT5	        DC.B	        '5',0
-PRT6	        DC.B	        '6',0
-PRT7	        DC.B	        '7',0
-PRT8	        DC.B	        '8',0
-PRT9	        DC.B	        '9',0
-PRTA	        DC.B	        'A',0
-PRTB	        DC.B	        'B',0
-PRTC	        DC.B	        'C',0
-PRTD	        DC.B	        'D',0
-PRTE	        DC.B	        'E',0
-PRTF	        DC.B	        'F',0
+STRING0	        DC.B	        '0',0
+STRING1	        DC.B	        '1',0
+STRING2	        DC.B	        '2',0
+STRING3	        DC.B	        '3',0
+STRING4	        DC.B	        '4',0
+STRING5	        DC.B	        '5',0
+STRING6	        DC.B	        '6',0
+STRING7	        DC.B	        '7',0
+STRING8	        DC.B	        '8',0
+STRING9	        DC.B	        '9',0
+STRINGA	        DC.B	        'A',0
+STRINGB	        DC.B	        'B',0
+STRINGC	        DC.B	        'C',0
+STRINGD	        DC.B	        'D',0
+STRINGE	        DC.B	        'E',0
+STRINGF	        DC.B	        'F',0
 
 NEWLINE         DC.W            ' ',0
 
-ZERO		    LEA		        PRT0,A1
+ZERO		    LEA		        STRING0, A1
 			    BRA		        PRINT_NUM
-ONE		        LEA		        PRT1,A1
+ONE		        LEA		        STRING1, A1
 			    BRA		        PRINT_NUM
-TWO		        LEA		        PRT2,A1
+TWO		        LEA		        STRING2, A1
 			    BRA		        PRINT_NUM
-THREE		    LEA		        PRT3,A1
+THREE		    LEA		        STRING3, A1
 			    BRA		        PRINT_NUM
-FOUR		    LEA		        PRT4,A1
+FOUR		    LEA		        STRING4, A1
 			    BRA		        PRINT_NUM
-FIVE		    LEA		        PRT5,A1
+FIVE		    LEA		        STRING5, A1
 			    BRA		        PRINT_NUM
-SIX		        LEA		        PRT6,A1
+SIX		        LEA		        STRING6, A1
 			    BRA		        PRINT_NUM
-SEVEN		    LEA		        PRT7,A1
+SEVEN		    LEA		        STRING7, A1
 			    BRA		        PRINT_NUM
-EIGHT		    LEA		        PRT8,A1
+EIGHT		    LEA		        STRING8, A1
 			    BRA		        PRINT_NUM
-NINE		    LEA		        PRT9,A1
+NINE		    LEA		        STRING9, A1
 			    BRA		        PRINT_NUM
-A		        LEA		        PRTA,A1
+A		        LEA		        STRINGA, A1
 			    BRA		        PRINT_NUM
-B   		    LEA		        PRTB,A1
+B   		    LEA		        STRINGB, A1
 			    BRA		        PRINT_NUM
-C   		    LEA		        PRTC,A1
+C   		    LEA		        STRINGC, A1
 			    BRA		        PRINT_NUM
-D     		    LEA		        PRTD,A1
+D     		    LEA		        STRINGD, A1
 			    BRA		        PRINT_NUM
-E		        LEA		        PRTE,A1
+E		        LEA		        STRINGE, A1
 			    BRA		        PRINT_NUM
-F   		    LEA		        PRTF,A1
+F   		    LEA		        STRINGF, A1
 			    BRA		        PRINT_NUM
 
                 END    START
