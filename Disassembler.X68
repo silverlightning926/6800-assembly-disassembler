@@ -321,6 +321,12 @@ PRINT_NEWLINE   LEA             STR_SPACE, A1
                 MOVE.B          #13, D0
                 TRAP            #15
                 RTS
+                
+PRINT_DOT       LEA             STRING_DOT, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                RTS
+
 
 PROMPT1	        DC.B 'Please enter the starting memory address in hexadecimal (Longword) form: ',0
 EXTRA1          DC.B '         ', 0
