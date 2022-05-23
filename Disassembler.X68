@@ -326,36 +326,7 @@ PRINT_DOT       LEA             STRING_DOT, A1
                 MOVE.B          #14, D0
                 TRAP            #15
                 RTS
-
-
-PROMPT1	        DC.B 'Please enter the starting memory address in hexadecimal (Longword) form: ',0
-EXTRA1          DC.B '         ', 0
-PROMPT2	        DC.B 'Please enter the ending memory address in hexadecimal (Longword) form: ',0
-EXTRA2          DC.B '         ', 0
-PROMPT3	        DC.B 'Do you wish to read another program? Type ONLY "Y" for Yes and "N" for No: ',0
-EXTRA3          DC.B '  ', 0
-GOODBYE	        DC.B 'Thank you for using our disassembler! Good Bye.',0
-
-STR_SPACE       DC.B ' ', 0
-STRING_DOT      DC.B '.', 0
-
-STRING0	        DC.B	        '0',0
-STRING1	        DC.B	        '1',0
-STRING2	        DC.B	        '2',0
-STRING3	        DC.B	        '3',0
-STRING4	        DC.B	        '4',0
-STRING5	        DC.B	        '5',0
-STRING6	        DC.B	        '6',0
-STRING7	        DC.B	        '7',0
-STRING8	        DC.B	        '8',0
-STRING9	        DC.B	        '9',0
-STRINGA	        DC.B	        'A',0
-STRINGB	        DC.B	        'B',0
-STRINGC	        DC.B	        'C',0
-STRINGD	        DC.B	        'D',0
-STRINGE	        DC.B	        'E',0
-STRINGF	        DC.B	        'F',0
-
+                
 ZERO		    LEA		        STRING0, A1
 			    BRA		        PRINT_NUM
 ONE		        LEA		        STRING1, A1
@@ -388,6 +359,35 @@ E		        LEA		        STRINGE, A1
 			    BRA		        PRINT_NUM
 F   		    LEA		        STRINGF, A1
 			    BRA		        PRINT_NUM
+
+
+PROMPT1	        DC.B 'Please enter the starting memory address in hexadecimal (Longword) form: ',0
+EXTRA1          DC.B '         ', 0
+PROMPT2	        DC.B 'Please enter the ending memory address in hexadecimal (Longword) form: ',0
+EXTRA2          DC.B '         ', 0
+PROMPT3	        DC.B 'Do you wish to read another program? Type ONLY "Y" for Yes and "N" for No: ',0
+EXTRA3          DC.B '  ', 0
+GOODBYE	        DC.B 'Thank you for using our disassembler! Good Bye.',0
+
+STR_SPACE       DC.B ' ', 0
+STRING_DOT      DC.B '.', 0
+
+STRING0	        DC.B '0',0
+STRING1	        DC.B '1',0
+STRING2	        DC.B '2',0
+STRING3	        DC.B '3',0
+STRING4	        DC.B '4',0
+STRING5	        DC.B '5',0
+STRING6	        DC.B '6',0
+STRING7	        DC.B '7',0
+STRING8	        DC.B '8',0
+STRING9	        DC.B '9',0
+STRINGA	        DC.B 'A',0
+STRINGB	        DC.B 'B',0
+STRINGC	        DC.B 'C',0
+STRINGD	        DC.B 'D',0
+STRINGE	        DC.B 'E',0
+STRINGF	        DC.B 'F',0
 
 INVALID_OPCODE_STRING           DC.B 'Invalid Opcode',0
 ADD_OPCODE_STRING               DC.B 'ADD',0
