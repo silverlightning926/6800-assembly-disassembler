@@ -322,11 +322,6 @@ PRINT_NEWLINE   LEA             STR_SPACE, A1
                 TRAP            #15
                 RTS
                 
-PRINT_DOT       LEA             STRING_DOT, A1
-                MOVE.B          #14, D0
-                TRAP            #15
-                RTS
-                
 ZERO		    LEA		        STRING0, A1
 			    BRA		        PRINT_NUM
 ONE		        LEA		        STRING1, A1
@@ -390,7 +385,7 @@ STRINGE	        DC.B 'E',0
 STRINGF	        DC.B 'F',0
 
 INVALID_OPCODE_STRING           DC.B 'Invalid Opcode',0
-ADD_OPCODE_STRING               DC.B 'ADD',0
+ADD_OPCODE_STRING               DC.B 'ADD.',0
 CMP_OPCODE_STRING               DC.B 'CMP',0
 OR_OPCODE_STRING                DC.B 'OR',0
 SUB_OPCODE_STRING               DC.B 'SUB',0
