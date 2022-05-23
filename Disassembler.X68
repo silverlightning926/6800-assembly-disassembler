@@ -122,76 +122,76 @@ READ_OPCODE     JSR            PRINT_MEM_ADDR
                 BRA INVALID_OPCODE
                 
 INVALID_OPCODE  
-                LEA            INVALID_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             INVALID_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
     
 ADD_OPCODE  
-                LEA            ADD_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15  
-                BRA            AFTER_OPCODE_DECODE
+                LEA             ADD_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15  
+                BRA             AFTER_OPCODE_DECODE
     
 CMP_OPCODE  
-                LEA            CMP_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             CMP_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
 
 OR_OPCODE  
-                LEA            OR_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             OR_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
 
 SUB_OPCODE  
-                LEA            SUB_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             SUB_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
 
 AND_OPCODE  
-                LEA            AND_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             AND_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
 
 MOVEB_OPCODE  
-                LEA            MOVEB_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             MOVEB_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
                 
 MOVEW_MOVEAW_OPCODE  
-                LEA            MOVEW_MOVEAW_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             MOVEW_MOVEAW_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
         
 MOVEL_MOVEAL_OPCODE  
-                LEA            MOVEL_MOVEAL_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             MOVEL_MOVEAL_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
                 
 BCC_OPCODE  
-                LEA            BCC_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             BCC_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
                 
 LEA_JSR_RTS_MOVEM_OPCODE  
-                LEA            LEA_JSR_RTS_MOVEM_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             LEA_JSR_RTS_MOVEM_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
 
 LSL_ASR_OPCODE  
-                LEA            LSL_ASR_OPCODE_STRING, A1
-                MOVE.B         #14, D0
-                TRAP           #15
-                BRA            AFTER_OPCODE_DECODE
+                LEA             LSL_ASR_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                BRA             AFTER_OPCODE_DECODE
 
 *------------------------------- EA ---------------------------------------- 
 
@@ -202,26 +202,26 @@ AFTER_OPCODE_DECODE
 
 *NOTE: WE NEED A CHECK HERE IF WE WANT TO STOP THE LOOP
 
-                JSR            PRINT_NEWLINE
+                JSR             PRINT_NEWLINE
 
-NEXT_INSTRUC    BRA            READ_OPCODE                   * IF DONE PRINTING INSTRUCTION AND THERE ARE MORE, READ ANOTHER 
+NEXT_INSTRUC    BRA             READ_OPCODE                   * IF DONE PRINTING INSTRUCTION AND THERE ARE MORE, READ ANOTHER 
 
 *-------------------------- PROGRAM END ------------------------------------
 
 
-EXIT_MAIN_LOOP  LEA            PROMPT3, A1                  * ASK USER IF THEY WANT TO KEEP USING THE PROGRAM
-                MOVE.B         #14, D0                      * DISPLAY GOODBYE
-                TRAP           #15  
-                LEA            EXTRA3, A1                   * TO READ IN USER INPUT
-                MOVE.B         #2, D0                       * STORE USER INPUT IN A1
-                TRAP           #15    
-                MOVE.B         (A1)+, D0           
-                CMP.B          #$59, D0                     * CHECK IF USER TYPED IN "Y"
-                BEQ            USER_INPUT
+EXIT_MAIN_LOOP  LEA             PROMPT3, A1                  * ASK USER IF THEY WANT TO KEEP USING THE PROGRAM
+                MOVE.B          #14, D0                      * DISPLAY GOODBYE
+                TRAP            #15  
+                LEA             EXTRA3, A1                   * TO READ IN USER INPUT
+                MOVE.B          #2, D0                       * STORE USER INPUT IN A1
+                TRAP            #15    
+                MOVE.B          (A1)+, D0           
+                CMP.B           #$59, D0                     * CHECK IF USER TYPED IN "Y"
+                BEQ             USER_INPUT
                 
-                LEA            GOODBYE, A1                  * LOAD GOOD BYE MESSAGE INTO A1
-                MOVE.B         #14, D0                      * DISPLAY GOODBYE
-                TRAP           #15                
+                LEA             GOODBYE, A1                  * LOAD GOOD BYE MESSAGE INTO A1
+                MOVE.B          #14, D0                      * DISPLAY GOODBYE
+                TRAP            #15                
                 
                 SIMHALT
                 
@@ -271,6 +271,7 @@ HEX_TO_STRING   MOVE.W          HEXBITS, D3
     
 CONVERT_NUM     ADDI.W          #$30, D3 
                 BRA             PRINT_LOOP
+                
 CONVERT_LETTER  ADDI.W          #$37, D3
                 BRA             PRINT_LOOP
 
@@ -311,14 +312,14 @@ PRINT_NUM	    MOVE	        #14, D0
 			    TRAP	        #15
 			    RTS
 
-PRINT_SPACE     LEA            STR_SPACE, A1
-                MOVE.B         #14, D0
-                TRAP           #15
+PRINT_SPACE     LEA             STR_SPACE, A1
+                MOVE.B          #14, D0
+                TRAP            #15
                 RTS
 
-PRINT_NEWLINE   LEA            STR_SPACE, A1
-                MOVE.B         #13, D0
-                TRAP           #15
+PRINT_NEWLINE   LEA             STR_SPACE, A1
+                MOVE.B          #13, D0
+                TRAP            #15
                 RTS
 
 PROMPT1	        DC.B 'Please enter the starting memory address in hexadecimal (Longword) form: ',0
@@ -330,6 +331,7 @@ EXTRA3          DC.B '  ', 0
 GOODBYE	        DC.B 'Thank you for using our disassembler! Good Bye.',0
 
 STR_SPACE       DC.B ' ', 0
+STRING_DOT      DC.B '.', 0
 
 STRING0	        DC.B	        '0',0
 STRING1	        DC.B	        '1',0
@@ -395,6 +397,7 @@ LEA_JSR_RTS_MOVEM_OPCODE_STRING DC.B 'LEA/JSR/RTS/MOVEM',0
 LSL_ASR_OPCODE_STRING           DC.B 'LSL/ASR',0
 
                 END    START
+
 
 
 *~Font name~Courier New~
