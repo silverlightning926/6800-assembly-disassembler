@@ -90,9 +90,9 @@ READ_OPCODE     JSR             PRINT_MEM_ADDR
                 
                 MOVE.W          D3, HEXBITS                 * MOVE D3 INTO HEXBITS
                 
-                LSR.W           #4, D3                      * SHIFT WORD FROM INSTRUCTION (IN D3) BY 4 BITS
-                LSR.W           #4, D3                      * SHIFT WORD FROM INSTRUCTION (IN D3) BY 4 BITS
-                LSR.W           #4, D3                      * SHIFT WORD FROM INSTRUCTION (IN D3) BY 4 BITS
+                LSR.W           #4, D3                      * SHIFT WORD INSTRUCTION (IN D3) BY 4 BITS
+                LSR.W           #4, D3                      * SHIFT WORD INSTRUCTION (IN D3) BY 4 BITS
+                LSR.W           #4, D3                      * SHIFT WORD INSTRUCTION (IN D3) BY 4 BITS
                                                             * D3 SHOULD NOW CONTAIN ONLY THE FIRST 4 BITS OF THE WORD (MOST OPCODES)
                 
                 CMP.B           #%1101, D3                          * COMPARE 4 BITS OF WORD TO ADD OPCODE (1101)
