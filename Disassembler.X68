@@ -161,7 +161,14 @@ CMP_OPCODE
                 LEA             CMP_OPCODE_STRING, A1
                 MOVE.B          #14, D0
                 TRAP            #15
-
+                            
+                JSR             SPLIT_AFTER_OPCODE
+                JSR             ANALYZE_OPMODE
+                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SPACE
+                
+                MOVE.W          HEXBITS, D3
+                JSR             SPLIT_AFTER_OPCODE
                 
                 BRA             AFTER_OPCODE_DECODE
 
@@ -256,6 +263,82 @@ EXIT_MAIN_LOOP  LEA             PROMPT3, A1                  * ASK USER IF THEY 
                 TRAP            #15                
                 
                 SIMHALT
+                
+SPLIT_AFTER_OPCODE
+                MOVE.W          HEXBITS, D3
+                LSL             #4,D3
+                LSR             #4,D3
+                LSR             #4,D3
+                LSR             #4,D3
+                LSR             #1,D3
+                
+                MOVE.W          D3, FIRST_THREE_BITS_AFTER_OPCODE
+                
+                MOVE.W          HEXBITS, D3
+                
+                LSL             #7,D3
+                LSR             #7,D3
+                LSR             #6,D3
+                
+                MOVE.W          D3, SECOND_THREE_BITS_AFTER_OPCODE
+                
+                MOVE.W          HEXBITS, D3
+                
+                LSL             #4,D3
+                LSL             #4,D3
+                LSL             #2,D3
+                LSR             #4,D3
+                LSR             #4,D3
+                LSR             #2,D3
+                LSR             #3,D3
+                
+                MOVE.W          D3, THIRD_THREE_BITS_AFTER_OPCODE
+
+                MOVE            HEXBITS, D3
+                LSL             #4,D3
+                LSL             #4,D3
+                LSL             #5,D3
+                LSR             #4,D3
+                LSR             #4,D3
+                LSR             #5,D3
+
+                MOVE.W          D3, FOURTH_THREE_BITS_AFTER_OPCODE
+
+                MOVE.W          HEXBITS, D3
+                RTS
+
+ANALYZE_OPMODE
+                JSR             SPLIT_AFTER_OPCODE
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                LSL             #6,D3
+                LSL             #8,D3
+                LSR             #6,D3
+                LSR             #8,D3
+                RTS
+                
+PRINT_SIZE_CODE
+                CMPI.B          #%00, D3
+                BEQ             PRINT_BYTE
+                CMPI.B          #%01, D3
+                BEQ             PRINT_WORD
+                CMPI.B          #%10, D3
+                BEQ             PRINT_LONG
+                RTS
+                
+PRINT_BYTE      LEA             BYTE, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                RTS
+                
+PRINT_WORD      LEA             WORD, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                RTS
+                
+PRINT_LONG      LEA             LONG, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                RTS
                 
 PRINT_MEM_ADDR  MOVE.L          A2, HEXBITS      
                 JSR             HEX_TO_STRING			
