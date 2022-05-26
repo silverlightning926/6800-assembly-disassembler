@@ -88,46 +88,47 @@ READ_OPCODE     JSR             PRINT_MEM_ADDR
                 
 *------------------------- DECODE OPCODE -----------------------------------
                 
-                MOVE.W          D3, HEXBITS
+                MOVE.W          D3, HEXBITS                 * MOVE D3 INTO HEXBITS
                 
-                LSR.W           #4, D3
-                LSR.W           #4, D3
-                LSR.W           #4, D3       
+                LSR.W           #4, D3                      * SHIFT WORD FROM INSTRUCTION (IN D3) BY 4 BITS
+                LSR.W           #4, D3                      * SHIFT WORD FROM INSTRUCTION (IN D3) BY 4 BITS
+                LSR.W           #4, D3                      * SHIFT WORD FROM INSTRUCTION (IN D3) BY 4 BITS
+                                                            * D3 SHOULD NOW CONTAIN ONLY THE FIRST 4 BITS OF THE WORD (MOST OPCODES)
                 
-                CMP.B           #$0D, D3
-                BEQ             ADD_OPCODE
+                CMP.B           #%1101, D3                  * COMPARE 4 BITS OF WORD TO ADD OPCODE (1101)
+                BEQ             ADD_OPCODE                  * IF EQUAL GO TO ADD_OPCODE     
                 
-                CMP.B           #$0B, D3
-                BEQ             CMP_OPCODE
+                CMP.B           #%1011, D3                  * COMPARE 4 BITS OF WORD TO CMP OPCODE (1011)
+                BEQ             CMP_OPCODE                  * IF EQUAL GO TO CMP_OPCODE
                 
-                CMP.B           #$08, D3
-                BEQ             OR_OPCODE
+                CMP.B           #%1000, D3                  * COMPARE 4 BITS OF WORD TO OR OPCODE (1000)
+                BEQ             OR_OPCODE                   * IF EQUAL GO TO OR_OPCODE
                 
-                CMP.B           #$09, D3
-                BEQ             SUB_OPCODE
+                CMP.B           #%1001, D3                  * COMPARE 4 BITS OF WORD TO SUB OPCODE (1001)
+                BEQ             SUB_OPCODE                  * IF EQUAL GO TO SUB_OPCODE
                 
-                CMP.B           #$0C, D3
-                BEQ             AND_OPCODE
+                CMP.B           #%1100, D3                  * COMPARE 4 BITS OF WORD TO ADD OPCODE (1100)                     
+                BEQ             AND_OPCODE                  * IF EQUAL GO TO AND_OPCODE
                 
-                CMP.B           #$01, D3
-                BEQ             MOVEB_OPCODE
+                CMP.B           #%0001, D3                  * COMPARE 4 BITS OF WORD TO MOVE.B OPCODE (0001)
+                BEQ             MOVEB_OPCODE                * IF EQUAL GO TO MOVEB_OPCODE
                 
-                CMP.B           #$03, D3
-                BEQ             MOVEW_MOVEAW_OPCODE
+                CMP.B           #%0011, D3                  * COMPARE 4 BITS OF THE WORD TO MOVEW/MOVEAW OPCODE (0011)
+                BEQ             MOVEW_MOVEAW_OPCODE         * IF EQUAL GO TO MOVEW_MOVEAW_OPCODE
                 
-                CMP.B           #$02, D3
-                BEQ             MOVEL_MOVEAL_OPCODE
+                CMP.B           #%0010, D3                  * COMPARE 4 BITS OF THE WORD TO MOVEL/MOVEAL OPCODE (0010)
+                BEQ             MOVEL_MOVEAL_OPCODE         * IF EQUAL GO TO MOVEL_MOVEAL_OPCODE
                 
-                CMP.B           #$06, D3
-                BEQ             BCC_OPCODE
+                CMP.B           #%0110, D3                  * COMPARE 4 BITS OF THE WORD TO BCC OPCODE (0110)
+                BEQ             BCC_OPCODE                  * IF EQUAL GO TO BCC_OPCODE
                 
-                CMP.B           #$4, D3
-                BEQ             LEA_JSR_RTS_MOVEM_OPCODE
+                CMP.B           #%0100, D3                  * COMPARE 4 BITS OF WORD TO LEA/JSR/RTS/MOVEM OPCODE (0100)
+                BEQ             LEA_JSR_RTS_MOVEM_OPCODE    * IF EQUAL GO TO LEA_JSR_RTS_MOVEM_OPCODE
                 
-                CMP.B           #$0E, D3
-                BEQ             LSL_ASR_OPCODE
+                CMP.B           #%1110, D3                  * COMPARE 4 BITS OF THE WORD TO LSL/ASR OPCODE (1110)
+                BEQ             LSL_ASR_OPCODE              * IF EQUAL GO TO LSL_ASR_OPCODE
                 
-                JSR INVALID_OPCODE
+                JSR INVALID_OPCODE                          * IF NOT EQUAL TO ABOVE OPCODE, ASSUME INVALID OPCODE/DATA
                 
 INVALID_OPCODE  
                 LEA             INVALID_OPCODE_STRING, A1
@@ -528,6 +529,7 @@ LEA_JSR_RTS_MOVEM_OPCODE_STRING DC.B 'LEA/JSR/RTS/MOVEM',0
 LSL_ASR_OPCODE_STRING           DC.B 'LSL/ASR',0
 
                 END    START
+
 
 
 
