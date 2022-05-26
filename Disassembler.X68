@@ -95,40 +95,46 @@ READ_OPCODE     JSR             PRINT_MEM_ADDR
                 LSR.W           #4, D3                      * SHIFT WORD FROM INSTRUCTION (IN D3) BY 4 BITS
                                                             * D3 SHOULD NOW CONTAIN ONLY THE FIRST 4 BITS OF THE WORD (MOST OPCODES)
                 
-                CMP.B           #%1101, D3                  * COMPARE 4 BITS OF WORD TO ADD OPCODE (1101)
-                BEQ             ADD_OPCODE                  * IF EQUAL GO TO ADD_OPCODE     
+                CMP.B           #%1101, D3                          * COMPARE 4 BITS OF WORD TO ADD OPCODE (1101)
+                BEQ             ADD_ADDA_OPCODE                     * IF EQUAL GO TO ADD_ADDA_OPCODE  
+
+                CMP.B           #%0101, D3                          * COMPARE 4 BITS OF WORD TO ADD OPCODE (0101)
+                BEQ             ADDQ_OPCODE                         * IF EQUAL GO TO ADDQ_OPCODE     
                 
-                CMP.B           #%1011, D3                  * COMPARE 4 BITS OF WORD TO CMP OPCODE (1011)
-                BEQ             CMP_OPCODE                  * IF EQUAL GO TO CMP_OPCODE
+                CMP.B           #%1011, D3                          * COMPARE 4 BITS OF WORD TO CMP OPCODE (1011)
+                BEQ             CMP_OPCODE                          * IF EQUAL GO TO CMP_OPCODE
                 
-                CMP.B           #%1000, D3                  * COMPARE 4 BITS OF WORD TO OR OPCODE (1000)
-                BEQ             OR_OPCODE                   * IF EQUAL GO TO OR_OPCODE
+                CMP.B           #%1000, D3                          * COMPARE 4 BITS OF WORD TO OR OPCODE (1000)
+                BEQ             OR_OPCODE                           * IF EQUAL GO TO OR_OPCODE
                 
-                CMP.B           #%1001, D3                  * COMPARE 4 BITS OF WORD TO SUB OPCODE (1001)
-                BEQ             SUB_OPCODE                  * IF EQUAL GO TO SUB_OPCODE
+                CMP.B           #%1001, D3                          * COMPARE 4 BITS OF WORD TO SUB OPCODE (1001)
+                BEQ             SUB_OPCODE                          * IF EQUAL GO TO SUB_OPCODE
                 
-                CMP.B           #%1100, D3                  * COMPARE 4 BITS OF WORD TO ADD OPCODE (1100)                     
-                BEQ             AND_OPCODE                  * IF EQUAL GO TO AND_OPCODE
+                CMP.B           #%1100, D3                          * COMPARE 4 BITS OF WORD TO ADD OPCODE (1100)                     
+                BEQ             AND_OPCODE                          * IF EQUAL GO TO AND_OPCODE
                 
-                CMP.B           #%0001, D3                  * COMPARE 4 BITS OF WORD TO MOVE.B OPCODE (0001)
-                BEQ             MOVEB_OPCODE                * IF EQUAL GO TO MOVEB_OPCODE
+                CMP.B           #%0001, D3                          * COMPARE 4 BITS OF WORD TO MOVE.B OPCODE (0001)
+                BEQ             MOVEB_OPCODE                        * IF EQUAL GO TO MOVEB_OPCODE
                 
-                CMP.B           #%0011, D3                  * COMPARE 4 BITS OF THE WORD TO MOVEW/MOVEAW OPCODE (0011)
-                BEQ             MOVEW_MOVEAW_OPCODE         * IF EQUAL GO TO MOVEW_MOVEAW_OPCODE
+                CMP.B           #%0111, D3                          * COMPARE 4 BITS OF THE WORD TO MOVEQ OPCODE (0111)
+                BEQ             MOVEQ_OPCODE                        * IF EQUAL GO TO MOVEQ_OPCODE
                 
-                CMP.B           #%0010, D3                  * COMPARE 4 BITS OF THE WORD TO MOVEL/MOVEAL OPCODE (0010)
-                BEQ             MOVEL_MOVEAL_OPCODE         * IF EQUAL GO TO MOVEL_MOVEAL_OPCODE
+                CMP.B           #%0011, D3                          * COMPARE 4 BITS OF THE WORD TO MOVEW/MOVEAW OPCODE (0011)
+                BEQ             MOVEW_MOVEAW_OPCODE                 * IF EQUAL GO TO MOVEW_MOVEAW_OPCODE
                 
-                CMP.B           #%0110, D3                  * COMPARE 4 BITS OF THE WORD TO BCC OPCODE (0110)
-                BEQ             BCC_OPCODE                  * IF EQUAL GO TO BCC_OPCODE
+                CMP.B           #%0010, D3                          * COMPARE 4 BITS OF THE WORD TO MOVEL/MOVEAL OPCODE (0010)
+                BEQ             MOVEL_MOVEAL_OPCODE                 * IF EQUAL GO TO MOVEL_MOVEAL_OPCODE
                 
-                CMP.B           #%0100, D3                  * COMPARE 4 BITS OF WORD TO LEA/JSR/RTS/MOVEM OPCODE (0100)
-                BEQ             LEA_JSR_RTS_MOVEM_OPCODE    * IF EQUAL GO TO LEA_JSR_RTS_MOVEM_OPCODE
+                CMP.B           #%0110, D3                          * COMPARE 4 BITS OF THE WORD TO BCC OPCODE (0110)
+                BEQ             BCC_BRA_OPCODE                      * IF EQUAL GO TO BCC_BRA_OPCODE
                 
-                CMP.B           #%1110, D3                  * COMPARE 4 BITS OF THE WORD TO LSL/ASR OPCODE (1110)
-                BEQ             LSL_ASR_OPCODE              * IF EQUAL GO TO LSL_ASR_OPCODE
+                CMP.B           #%0100, D3                          * COMPARE 4 BITS OF WORD TO LEA/NOP/JSR/RTS/MOVEM OPCODE (0100)
+                BEQ             LEA_NOP_NOT_JSR_RTS_MOVEM_OPCODE    * IF EQUAL GO TO LEA_NOP_NOT_JSR_RTS_MOVEM_OPCODE
                 
-                JSR INVALID_OPCODE                          * IF NOT EQUAL TO ABOVE OPCODE, ASSUME INVALID OPCODE/DATA
+                CMP.B           #%1110, D3                          * COMPARE 4 BITS OF THE WORD TO LSL/ASR OPCODE (1110)
+                BEQ             LSL_LSR_ASL_ASR_ROL_ROR_OPCODE      * IF EQUAL GO TO LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
+                
+                JSR INVALID_OPCODE                                  * IF NOT EQUAL TO ABOVE OPCODE, ASSUME INVALID OPCODE/DATA
                 
 INVALID_OPCODE  
                 LEA             INVALID_OPCODE_STRING, A1
@@ -139,14 +145,17 @@ INVALID_OPCODE
                 
                 BRA             AFTER_OPCODE_DECODE
     
-ADD_OPCODE  
-                LEA             ADD_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15  
-                
-                
+ADD_ADDA_OPCODE  
+
+
                 
                 BRA             AFTER_OPCODE_DECODE
+                
+ADDQ_OPCODE  
+
+
+                
+                BRA             AFTER_OPCODE_DECODE                
     
 CMP_OPCODE  
                 LEA             CMP_OPCODE_STRING, A1
@@ -163,82 +172,61 @@ CMP_OPCODE
                 
                 BRA             AFTER_OPCODE_DECODE
 
-OR_OPCODE  
-                LEA             OR_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+OR_OPCODE
                 
                 
                 
                 BRA             AFTER_OPCODE_DECODE
 
-SUB_OPCODE  
-                LEA             SUB_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+SUB_OPCODE
                 
                 
                 
                 BRA             AFTER_OPCODE_DECODE
 
-AND_OPCODE  
-                LEA             AND_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+AND_OPCODE
                 
                 
                 
                 BRA             AFTER_OPCODE_DECODE
 
-MOVEB_OPCODE  
-                LEA             MOVEB_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+MOVEB_OPCODE
                 
                 
                 
                 BRA             AFTER_OPCODE_DECODE
                 
-MOVEW_MOVEAW_OPCODE  
-                LEA             MOVEW_MOVEAW_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+MOVEQ_OPCODE
+                
+                
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+MOVEW_MOVEAW_OPCODE
                 
                 
                 
                 BRA             AFTER_OPCODE_DECODE
         
-MOVEL_MOVEAL_OPCODE  
-                LEA             MOVEL_MOVEAL_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+MOVEL_MOVEAL_OPCODE
                 
                                 
                 
                 BRA             AFTER_OPCODE_DECODE
                 
-BCC_OPCODE  
-                LEA             BCC_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+BCC_BRA_OPCODE
                 
                 
                 
                 BRA             AFTER_OPCODE_DECODE
                 
-LEA_JSR_RTS_MOVEM_OPCODE  
-                LEA             LEA_JSR_RTS_MOVEM_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+LEA_NOP_NOT_JSR_RTS_MOVEM_OPCODE  
                 
                 
                               
                 BRA             AFTER_OPCODE_DECODE
 
-LSL_ASR_OPCODE  
-                LEA             LSL_ASR_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
+LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
                 
                 
                 
@@ -515,18 +503,8 @@ BYTE            DC.B 'B',0
 WORD            DC.B 'W',0
 LONG            DC.B 'L',0
 
-INVALID_OPCODE_STRING           DC.B 'DATA',0
-ADD_OPCODE_STRING               DC.B 'ADD.',0
-CMP_OPCODE_STRING               DC.B 'CMP.',0
-OR_OPCODE_STRING                DC.B 'OR',0
-SUB_OPCODE_STRING               DC.B 'SUB',0
-AND_OPCODE_STRING               DC.B 'AND',0
-MOVEB_OPCODE_STRING             DC.B 'MOVE.B',0
-MOVEW_MOVEAW_OPCODE_STRING      DC.B 'MOVEW/MOVEAW',0
-MOVEL_MOVEAL_OPCODE_STRING      DC.B 'MOVEL/MOVEEAL',0
-BCC_OPCODE_STRING               DC.B 'BCC (BGT, BLE, BEQ)',0
-LEA_JSR_RTS_MOVEM_OPCODE_STRING DC.B 'LEA/JSR/RTS/MOVEM',0
-LSL_ASR_OPCODE_STRING           DC.B 'LSL/ASR',0
+INVALID_OPCODE_STRING   DC.B 'DATA',0
+CMP_OPCODE_STRING       DC.B 'CMP.',0
 
                 END    START
 
