@@ -228,12 +228,14 @@ AND_OPCODE
                 JSR             PRINT_SIZE_CODE
                 JSR             PRINT_SPACE               
                 
-                
                 BRA             AFTER_OPCODE_DECODE
 
 MOVEB_OPCODE
+                LEA             MOVEB_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
                 
-                
+                JSR             PRINT_SPACE
                 
                 BRA             AFTER_OPCODE_DECODE
                 
@@ -558,6 +560,7 @@ ADDQ_OPCODE_STRING      DC.B 'ADDQ.',0
 SUB_OPCODE_STRING       DC.B 'SUB.',0
 AND_OPCODE_STRING       DC.B 'AND.',0
 OR_OPCODE_STRING        DC.B 'OR.',0
+MOVEB_OPCODE_STRING     DC.B 'MOVE.B',0
 
                 END    START
 
