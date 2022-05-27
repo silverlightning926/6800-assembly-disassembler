@@ -240,20 +240,62 @@ MOVEB_OPCODE
                 BRA             AFTER_OPCODE_DECODE
                 
 MOVEQ_OPCODE
+                LEA             MOVEQ_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
                 
-                
+                JSR             PRINT_SPACE
                 
                 BRA             AFTER_OPCODE_DECODE
                 
 MOVEW_MOVEAW_OPCODE
+                JSR             SPLIT_AFTER_OPCODE
                 
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
                 
+                CMP.B           #%001, D3
+                BEQ             MOVEAW_OPCODE
+                
+                LEA             MOVEW_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+MOVEAW_OPCODE
+                LEA             MOVEAW_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
                 
                 BRA             AFTER_OPCODE_DECODE
         
 MOVEL_MOVEAL_OPCODE
+                JSR             SPLIT_AFTER_OPCODE
                 
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                
+                CMP.B           #%001, D3
+                BEQ             MOVEAL_OPCODE
+                
+                LEA             MOVEL_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
                                 
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+MOVEAL_OPCODE
+                LEA             MOVEAL_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
                 
                 BRA             AFTER_OPCODE_DECODE
                 
@@ -561,6 +603,11 @@ SUB_OPCODE_STRING       DC.B 'SUB.',0
 AND_OPCODE_STRING       DC.B 'AND.',0
 OR_OPCODE_STRING        DC.B 'OR.',0
 MOVEB_OPCODE_STRING     DC.B 'MOVE.B',0
+MOVEQ_OPCODE_STRING     DC.B 'MOVEQ',0
+MOVEW_OPCODE_STRING     DC.B 'MOVE.W',0
+MOVEAW_OPCODE_STRING    DC.B 'MOVEA.W',0
+MOVEL_OPCODE_STRING     DC.B 'MOVE.L', 0
+MOVEAL_OPCODE_STRING    DC.B 'MOVEA.L',0
 
                 END    START
 
