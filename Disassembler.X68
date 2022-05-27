@@ -340,7 +340,7 @@ PRINT_ADDA_SIZE_CODE
                 CMP.B           #%011, D3
                 CMPI.B          #%01, D3
                 BEQ             PRINT_WORD
-                CMPI.B          #%10, D3
+                CMP.B           #%111, D3
                 BEQ             PRINT_LONG
                 RTS
                 
