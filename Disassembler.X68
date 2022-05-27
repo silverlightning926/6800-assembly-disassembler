@@ -318,18 +318,26 @@ SPLIT_AFTER_OPCODE
 
                 MOVE.W          HEXBITS, D3
                 RTS
-                
-SANATIZE_OPMODE
-                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
-                LSL             #6,D3
-                LSL             #8,D3
-                LSR             #6,D3
-                LSR             #8,D3
-                RTS
 
 PRINT_SIZE_CODE
-                CMPI.B          #%00, D3
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                CMP.B           #%000, D3
                 BEQ             PRINT_BYTE
+                CMP.B           #%001, D3
+                BEQ             PRINT_WORD
+                CMP.B           #%010, D3
+                BEQ             PRINT_LONG
+                CMP.B           #%100, D3
+                BEQ             PRINT_BYTE
+                CMP.B           #%101, D3
+                BEQ             PRINT_WORD
+                CMP.B           #%110, D3
+                BEQ             PRINT_LONG
+                RTS
+                
+PRINT_ADDA_SIZE_CODE
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                CMP.B           #%011, D3
                 CMPI.B          #%01, D3
                 BEQ             PRINT_WORD
                 CMPI.B          #%10, D3
