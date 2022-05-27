@@ -163,7 +163,7 @@ CMP_OPCODE
                 TRAP            #15
                             
                 JSR             SPLIT_AFTER_OPCODE
-                JSR             ANALYZE_OPMODE
+                JSR             SANATIZE_OPMODE
                 JSR             PRINT_SIZE_CODE
                 JSR             PRINT_SPACE
                 
@@ -306,16 +306,15 @@ SPLIT_AFTER_OPCODE
 
                 MOVE.W          HEXBITS, D3
                 RTS
-
-ANALYZE_OPMODE
-                JSR             SPLIT_AFTER_OPCODE
+                
+SANATIZE_OPMODE
                 MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
                 LSL             #6,D3
                 LSL             #8,D3
                 LSR             #6,D3
                 LSR             #8,D3
                 RTS
-                
+
 PRINT_SIZE_CODE
                 CMPI.B          #%00, D3
                 BEQ             PRINT_BYTE
@@ -507,6 +506,8 @@ INVALID_OPCODE_STRING   DC.B 'DATA',0
 CMP_OPCODE_STRING       DC.B 'CMP.',0
 
                 END    START
+
+
 
 
 
