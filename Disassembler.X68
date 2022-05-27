@@ -128,8 +128,8 @@ READ_OPCODE     JSR             PRINT_MEM_ADDR
                 CMP.B           #%0110, D3                          * COMPARE 4 BITS OF THE WORD TO BCC OPCODE (0110)
                 BEQ             BCC_BRA_OPCODE                      * IF EQUAL GO TO BCC_BRA_OPCODE
                 
-                CMP.B           #%0100, D3                          * COMPARE 4 BITS OF WORD TO LEA/NOP/JSR/RTS/MOVEM OPCODE (0100)
-                BEQ             LEA_NOP_NOT_JSR_RTS_MOVEM_OPCODE    * IF EQUAL GO TO LEA_NOP_NOT_JSR_RTS_MOVEM_OPCODE
+                CMP.B           #%0100, D3                          * COMPARE 4 BITS OF WORD TO LEA/NOP/JSR/RTS/ OPCODE (0100)
+                BEQ             LEA_NOP_NOT_JSR_RTS_OPCODE              * IF EQUAL GO TO LEA_NOP_NOT_JSR_RTS_OPCODE
                 
                 CMP.B           #%1110, D3                          * COMPARE 4 BITS OF THE WORD TO LSL/ASR OPCODE (1110)
                 BEQ             LSL_LSR_ASL_ASR_ROL_ROR_OPCODE      * IF EQUAL GO TO LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
@@ -220,7 +220,7 @@ BCC_BRA_OPCODE
                 
                 BRA             AFTER_OPCODE_DECODE
                 
-LEA_NOP_NOT_JSR_RTS_MOVEM_OPCODE  
+LEA_NOP_NOT_JSR_RTS_OPCODE  
                 
                 
                               
