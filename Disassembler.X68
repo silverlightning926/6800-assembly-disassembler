@@ -146,8 +146,30 @@ INVALID_OPCODE
                 BRA             AFTER_OPCODE_DECODE
     
 ADD_ADDA_OPCODE  
-
-
+                JSR             SPLIT_AFTER_OPCODE
+                
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                
+                CMP.B           #%011, D3
+                BEQ             ADDA_OPCODE
+                CMP.B           #%111, D3
+                BEQ             ADDA_OPCODE
+                
+                LEA             ADD_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+ADDA_OPCODE
+                LEA             ADDA_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_ADDA_SIZE_CODE
                 
                 BRA             AFTER_OPCODE_DECODE
                 
@@ -170,12 +192,8 @@ CMP_OPCODE
                 TRAP            #15
                             
                 JSR             SPLIT_AFTER_OPCODE
-                JSR             SANATIZE_OPMODE
                 JSR             PRINT_SIZE_CODE
                 JSR             PRINT_SPACE 
-                
-                MOVE.W          HEXBITS, D3
-                JSR             SPLIT_AFTER_OPCODE
                 
                 BRA             AFTER_OPCODE_DECODE
 
@@ -191,13 +209,24 @@ OR_OPCODE
                 BRA             AFTER_OPCODE_DECODE
 
 SUB_OPCODE
+                LEA             SUB_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
                 
-                
+                JSR             SPLIT_AFTER_OPCODE
+                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SPACE
                 
                 BRA             AFTER_OPCODE_DECODE
 
-AND_OPCODE
+AND_OPCODE      
+                LEA             AND_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
                 
+                JSR             SPLIT_AFTER_OPCODE
+                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SPACE               
                 
                 
                 BRA             AFTER_OPCODE_DECODE
@@ -338,7 +367,6 @@ PRINT_SIZE_CODE
 PRINT_ADDA_SIZE_CODE
                 MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
                 CMP.B           #%011, D3
-                CMPI.B          #%01, D3
                 BEQ             PRINT_WORD
                 CMP.B           #%111, D3
                 BEQ             PRINT_LONG
@@ -524,6 +552,12 @@ LONG            DC.B 'L',0
 
 INVALID_OPCODE_STRING   DC.B 'DATA',0
 CMP_OPCODE_STRING       DC.B 'CMP.',0
+ADD_OPCODE_STRING       DC.B 'ADD.',0
+ADDA_OPCODE_STRING      DC.B 'ADDA.',0
+ADDQ_OPCODE_STRING      DC.B 'ADDQ.',0
+SUB_OPCODE_STRING       DC.B 'SUB.',0
+AND_OPCODE_STRING       DC.B 'AND.',0
+OR_OPCODE_STRING        DC.B 'OR.',0
 
                 END    START
 
