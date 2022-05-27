@@ -173,8 +173,13 @@ CMP_OPCODE
                 BRA             AFTER_OPCODE_DECODE
 
 OR_OPCODE
+                LEA             OR_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
                 
-                
+                JSR             SPLIT_AFTER_OPCODE
+                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SPACE
                 
                 BRA             AFTER_OPCODE_DECODE
 
