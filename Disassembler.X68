@@ -165,7 +165,7 @@ CMP_OPCODE
                 JSR             SPLIT_AFTER_OPCODE
                 JSR             SANATIZE_OPMODE
                 JSR             PRINT_SIZE_CODE
-                JSR             PRINT_SPACE
+                JSR             PRINT_SPACE 
                 
                 MOVE.W          HEXBITS, D3
                 JSR             SPLIT_AFTER_OPCODE
