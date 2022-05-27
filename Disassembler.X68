@@ -300,10 +300,23 @@ MOVEAL_OPCODE
                 BRA             AFTER_OPCODE_DECODE
                 
 BCC_BRA_OPCODE
+                MOVE.W          HEXBITS, D3
+                LSL             #4, D3
+                LSL             #4, D3
+                LSL             #4, D3
+                LSL             #4, D3
+                LSL             #4, D3
                 
+                LSR             #4, D3
+                LSR             #4, D3
+                LSR             #4, D3
+                LSR             #4, D3
+                LSR             #4, D3
+                LSR             #4, D3
+                LSR             #4, D3
+                LSR             #4, D3
                 
-                
-                BRA             AFTER_OPCODE_DECODE
+                * NOW WE HAVE THE BITS FOR THE CONDITION
                 
 LEA_NOP_NOT_JSR_RTS_OPCODE  
                 
