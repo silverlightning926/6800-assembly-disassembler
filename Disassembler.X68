@@ -151,9 +151,16 @@ ADD_ADDA_OPCODE
                 
                 BRA             AFTER_OPCODE_DECODE
                 
-ADDQ_OPCODE  
-
-
+ADDQ_OPCODE
+                LEA             ADDQ_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             SPLIT_AFTER_OPCODE
+                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SPACE
+                
+                MOVE.W          HEXBITS, D3
                 
                 BRA             AFTER_OPCODE_DECODE                
     
