@@ -317,7 +317,53 @@ BCC_BRA_OPCODE
                 LSR             #4, D3
                 LSR             #4, D3
                 
-                * NOW WE HAVE THE BITS FOR THE CONDITION
+                CMP.B           #%0000, D3
+                BEQ             BRA_OPCODE
+                
+                CMP.B           #%0111, D3
+                BEQ             BEQ_OPCODE
+                
+                CMP.B           #%1110, D3
+                BEQ             BGT_OPCODE
+                
+                CMP.B           #%1111, D3
+                BEQ             BLE_OPCODE
+                
+BRA_OPCODE
+                LEA             BRA_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+
+                BRA             AFTER_OPCODE_DECODE
+                
+BEQ_OPCODE      
+                LEA             BEQ_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+BGT_OPCODE
+                LEA             BGT_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+BLE_OPCODE
+                LEA             BLE_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE
                 
 LEA_NOP_NOT_JSR_RTS_OPCODE  
                 
@@ -938,8 +984,13 @@ MOVEB_OPCODE_STRING     DC.B 'MOVE.B',0
 MOVEQ_OPCODE_STRING     DC.B 'MOVEQ',0
 MOVEW_OPCODE_STRING     DC.B 'MOVE.W',0
 MOVEAW_OPCODE_STRING    DC.B 'MOVEA.W',0
-MOVEL_OPCODE_STRING     DC.B 'MOVE.L', 0
+MOVEL_OPCODE_STRING     DC.B 'MOVE.L',0
 MOVEAL_OPCODE_STRING    DC.B 'MOVEA.L',0
+BRA_OPCODE_STRING       DC.B 'BRA',0
+BEQ_OPCODE_STRING       DC.B 'BEQ',0
+BGT_OPCODE_STRING       DC.B 'BGT',0
+BLE_OPCODE_STRING       DC.B 'BLE',0
+
 
 D_Mode          DC.B    'D', 0  * DATA REGISTER DIRECT 
 A_Mode          DC.B    'A', 0  * ADDRESS REGISTER DIRECT
@@ -954,16 +1005,6 @@ Comma           DC.B    ',', 0  * COMMA
 Invalid_EA      DC.B    '$WXYZ', 0
 
                 END    START
-
-
-
-
-
-
-
-
-
-
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
