@@ -2,7 +2,7 @@
 * Title      : Final Project
 * Written by : Group 4 - Arkar Kyaw Swar, Siddharth Rao, Eric Dang
 * Date       : 06/02/2022
-* Description: Disassembler
+* Description: 68K Disassembler
 *-----------------------------------------------------------
 HEXBITS                         EQU $100
 
@@ -10,6 +10,7 @@ FIRST_THREE_BITS_AFTER_OPCODE   EQU $200
 SECOND_THREE_BITS_AFTER_OPCODE  EQU $210
 THIRD_THREE_BITS_AFTER_OPCODE   EQU $220
 FOURTH_THREE_BITS_AFTER_OPCODE  EQU $230
+DATA_SIZE                       EQU $240
 
 CR                              EQU $0D               
 LF                              EQU $0A
@@ -206,7 +207,7 @@ OR_OPCODE
                 JSR             PRINT_SIZE_CODE
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_AND_OR_EA
 
 SUB_OPCODE
                 LEA             SUB_OPCODE_STRING, A1
@@ -217,7 +218,7 @@ SUB_OPCODE
                 JSR             PRINT_SIZE_CODE
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_SUB_EA
 
 AND_OPCODE      
                 LEA             AND_OPCODE_STRING, A1
@@ -228,7 +229,7 @@ AND_OPCODE
                 JSR             PRINT_SIZE_CODE
                 JSR             PRINT_SPACE               
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_AND_OR_EA
 
 MOVEB_OPCODE
                 LEA             MOVEB_OPCODE_STRING, A1
@@ -334,12 +335,318 @@ LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
 
 AFTER_OPCODE_DECODE
 
+P_INVALID_EA  
+    
+P_ADD_EA  
 
+P_ADDA_EA
+
+                
+P_ADDQ_EA
+           
+    
+P_CMP_EA  
+                
+
+P_SUB_EA
+    
+                CMP.B       #1, D2                                          * CHECK WHICH OPMODE
+                BEQ         P_SUB_DnFIRST_EA                                * SUB OPMODE =>  EA - Dn -> EA
+                                                                            * IF DIDN'T BRANCH, SUB OPMODE =>  Dn - EA -> Dn
+                
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE
+                JSR         EA_MODE_TABLE
+                JSR         COMMA_PRINT
+                
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR         Dn_Mode_Print 
+                
+                BRA         INSTRUC_DONE 
+    
+P_SUB_DnFIRST_EA
+
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR         Dn_Mode_Print         
+                JSR         COMMA_PRINT
+                
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE
+                JSR         EA_MODE_TABLE
+                
+                BRA         INSTRUC_DONE 
+
+P_AND_OR_EA      
+                CMP.B       #1, D2                                          * CHECK WHICH OPMODE
+                BEQ         P_AND_OR_DnFIRST_EA                                * AND OPMODE =>  Dn /\ EA -> EA
+                                                                            * IF DIDN'T BRANCH, AND OPMODE =>  EA /\ Dn -> Dn
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE
+                JSR         EA_MODE_TABLE
+                JSR         COMMA_PRINT
+                
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR         Dn_Mode_Print 
+                
+                BRA         INSTRUC_DONE 
+
+
+P_AND_OR_DnFIRST_EA
+
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR         Dn_Mode_Print         
+                JSR         COMMA_PRINT
+                
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE
+                JSR         EA_MODE_TABLE
+                
+                BRA         INSTRUC_DONE       
+
+P_MOVEB_EA
+
+                
+P_MOVEQ_EA
+
+                
+P_MOVEW_EA
+
+P_MOVEAW_EA
+
+                
+
+        
+P_MOVEL_EA
+
+                
+P_MOVEAL_EA
+
+                
+P_BCC_BRA_EA
+
+                
+P_LEA_EA  
+
+P_NOP_RTS_EA 
+                BRA         INSTRUC_DONE
+P_NOT_JSR_EA 
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                JSR         EA_MODE_TABLE
+                BRA         INSTRUC_DONE
+                                    
+
+P_LSL_LSR_ASL_ASR_ROL_ROR_EA
+
+
+*------------------------------ EA SUBROUTINES -------------------------------                
+             
+EA_MODE_TABLE
+                CMP.B #%0000, D1            * DATA REGISTER DIRECT
+                BEQ Dn_Mode_Print
+                
+                CMP.B #%0001,D1             * ADDRESS REGISTER DIRECT
+                BEQ An_Mode_Print
+                
+                CMP.B #%0010, D1            * ADDRESS REGISTER INDIRECT
+                BEQ INDIRECT_MODE_PRINT
+
+                CMP.B    #%0011,D1                  * Address Register Indirect with Post incrementing
+                BEQ      ID_POST_INCRE_PRINT    
+           
+                CMP.B    #%0100,D1                  * Address Register Indirect with Pre decrementing
+                BEQ      ID_PRE_DECRE_PRINT
+                
+                CMP.B   #%0111, D1
+                BNE     INVALID
+                
+                CMP.B   #%0100,D4           * IMMEDIATE
+                BEQ     IMMEDIATE_PRINT
+                
+                CMP.B    #%0001,D4          * ABSOLUTE DATA LONG
+                BEQ      ABS_L_PRINT
+           
+                CMP.B    #%0000,D4          * ABSOLUTE DATA SHORT
+                BEQ      ABS_S_PRINT
+  
+INVALID         BRA     INVALID_EA_PRINT
+
+                RTS
+
+Dn_Mode_Print                                   * Dn
+                LEA     D_Mode, A1                   
+                MOVE.B  #14, D0
+                TRAP    #15                    
+                
+                MOVE.L  D4, D1
+                MOVE.B  #3, D0
+                TRAP    #15
+                
+                RTS
+
+An_Mode_Print                                    * An
+                LEA     A_Mode, A1                   
+                MOVE.B  #14, D0
+                TRAP    #15                    
+                
+                MOVE.L  D4, D1
+                MOVE.B  #3, D0
+                TRAP    #15
+                RTS
+                
+                
+INDIRECT_MODE_PRINT                              * (An)
+                LEA     Open_pars, A1                * LOAD AT ADDRESS OF OPEN_PARENTHESY TO A1
+                MOVE.B  #14, D0
+                TRAP    #15
+                
+                LEA     A_Mode, A1                   * PRINT An MODE
+                MOVE.B  #14, D0
+                TRAP    #15
+                
+                MOVE.L  D4, D1
+                MOVE.B  #3, D0
+                TRAP    #15
+                
+                LEA     Close_pars, A1               * LOAD AT ADDRESS OF OPEN_PARENTHESY TO A1
+                MOVE.B  #14, D0
+                TRAP    #15
+                
+                RTS
+
+ID_POST_INCRE_PRINT                              * (An)+
+                LEA Open_pars, A1                * LOAD AT ADDRESS OF OPEN_PARENTHESY TO A1
+                MOVE.B #14, D0
+                TRAP #15
+                
+                LEA A_Mode, A1                   * PRINT An MODE
+                MOVE.B #14, D0
+                TRAP #15
+                
+                MOVE.L  D4, D1
+                MOVE.B  #3, D0
+                TRAP    #15
+                
+                LEA Close_pars, A1                * LOAD AT ADDRESS OF OPEN_PARENTHESY TO A1
+                MOVE.B #14, D0
+                TRAP #15
+                
+                LEA Plus_sign, A1                LOAD AT ADDRESS OF PLUS SIGN TO A1
+                MOVE.B #14, D0
+                TRAP #15
+                
+                RTS
+                
+ID_PRE_DECRE_PRINT                               * -(An)
+                LEA Minus_sign, A1               * LOAD AT ADDRESS OF PLUS SIGN TO A1
+                MOVE.B #14, D0
+                TRAP #15                
+                
+                LEA Open_pars, A1                * LOAD AT ADDRESS OF OPEN_PARENTHESY TO A1
+                MOVE.B #14, D0
+                TRAP #15
+                
+                LEA A_Mode, A1                   * PRINT An MODE
+                MOVE.B #14, D0
+                TRAP #15
+                
+                MOVE.L  D4, D1
+                MOVE.B  #3, D0
+                TRAP    #15 
+                
+                LEA Close_pars, A1               * LOAD AT ADDRESS OF OPEN_PARENTHESY TO A1
+                MOVE.B #14, D0
+                TRAP #15
+                
+                RTS
+
+ABS_S_PRINT                                       * It specifies a 16 bit address, sign extended to 24/32 bits
+                LEA Dollar_sign, A1               * LOAD A1 TO DOLLAR SIGN ADDRESS
+                MOVE.B #14, D0
+                TRAP #15
+                
+                MOVE.W (A2)+, D1                   * MOVE THE CONTENT OF ADDRESS A2 TO D1 ( IN WORD SIZE)
+
+                JSR TRAP_PRINT                    * JUMP TO SUB ROUNTINE TO PRINT OUT THE TRAP
+                CLR D1                            * CLEAR D1 TO 0
+                RTS
+                
+ABS_L_PRINT 
+                LEA Dollar_sign, A1               * LOAD A1 TO DOLLAR SIGN ADDRESS
+                MOVE.B #14, D0
+                TRAP #15
+                
+                MOVE.L  (A2)+, D1                    * MOVE THE CONTENT OF ADDRESS A2 TO D1 ( IN LONG SIZE)
+
+                JSR TRAP_PRINT                    * JUMP TO SUB ROUNTINE TO PRINT OUT THE TRAP
+                CLR D1                            * CLEAR D1 TO 0
+                RTS                
+                
+IMMEDIATE_PRINT                                      
+              LEA Hash_sign, A1                   * LOAD AT ADDRESS OF HASH SIGN TO A1
+              MOVE.B #14 , D0
+              TRAP #15
+              
+              CMP.W   #%0010, DATA_SIZE           * COMPARE TO TO SEE THE IMMEDIATE DATA SIZE
+              BEQ     IMD_LONG                    * LONG SIZE 
+              CMP.W   #%0110, DATA_SIZE           * COMPARE TO TO SEE THE IMMEDIATE DATA SIZE
+              BEQ     IMD_LONG                    * LONG SIZE 
+              BRA     IMD_WORD                    * WORD SIZE 
+                
+IMD_LONG         
+              MOVE.L  (A2)+,D1                    
+              JSR      PRINT_IMMEDIATE   
+              CLR.L    D1
+              RTS                
+IMD_WORD
+              MOVE.W  (A2)+,D1                
+              JSR     PRINT_IMMEDIATE        
+              CLR.L   D1
+              RTS                
+                
+PRINT_IMMEDIATE                                   * $# 
+              LEA Dollar_sign, A1
+              MOVE.B #14, D0
+              TRAP #15
+              
+              MOVEQ #15, D0                      
+              MOVEQ #16, D2                      
+              TRAP #15                           * INTERUPT
+              RTS                
+                
+IMD_DATA_PRINT                                      
+              LEA Hash_sign, A1                   * PRINT HASH SIGN 
+              MOVE.B #14, D0
+              TRAP #15
+
+                
+              LEA Dollar_sign, A1                 * PRINT DOLLAR SIGN
+              MOVE.B #14, D0
+              TRAP #15
+              
+              JSR TRAP_PRINT                      * PRINT THE NECCESSARY TRAP
+              RTS
+
+INVALID_EA_PRINT    
+              LEA Invalid_EA, A1                  * LOAD A1 TO Invalid ea message
+              MOVE.B #14, D0
+              TRAP #15                            * HARDWARE INTERUPT
+              RTS                        
+                
+TRAP_PRINT
+              MOVEQ #15, D0                      
+              MOVEQ #16, D2                       * display data in hex in D2( BASE 16) 
+              TRAP #15                            * INTERUPT
+              RTS                                 * RETURN 
 *------------------------- PRINT OUT INSTRUCTION ----------------------------
 
 *NOTE: WE NEED A CHECK HERE IF WE WANT TO STOP THE LOOP
 
-                JSR             PRINT_NEWLINE
+INSTRUC_DONE    JSR             PRINT_NEWLINE
 
 NEXT_INSTRUC    BRA             READ_OPCODE                   * IF DONE PRINTING INSTRUCTION AND THERE ARE MORE, READ ANOTHER 
 
@@ -406,6 +713,7 @@ SPLIT_AFTER_OPCODE
                 RTS
 
 PRINT_SIZE_CODE
+                CLR             D2
                 MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
                 CMP.B           #%000, D3
                 BEQ             PRINT_BYTE
@@ -419,7 +727,13 @@ PRINT_SIZE_CODE
                 BEQ             PRINT_WORD
                 CMP.B           #%110, D3
                 BEQ             PRINT_LONG
-                RTS
+               
+                CMP.B           #%100, D3
+                BLT             NO_CHANGE
+                
+                MOVE.B          #1, D2                                      *TO INDICATE OPMODE TO ADD AND SUB
+                
+NO_CHANGE       RTS
                 
 PRINT_ADDA_SIZE_CODE
                 MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
@@ -442,6 +756,11 @@ PRINT_WORD      LEA             WORD, A1
 PRINT_LONG      LEA             LONG, A1
                 MOVE.B          #14, D0
                 TRAP            #15
+                RTS
+                
+COMMA_PRINT     LEA Comma, A1                       
+                MOVE.B #14, D0
+                TRAP #15
                 RTS
                 
 PRINT_MEM_ADDR  MOVE.L          A2, HEXBITS      
@@ -622,7 +941,23 @@ MOVEAW_OPCODE_STRING    DC.B 'MOVEA.W',0
 MOVEL_OPCODE_STRING     DC.B 'MOVE.L', 0
 MOVEAL_OPCODE_STRING    DC.B 'MOVEA.L',0
 
+D_Mode          DC.B    'D', 0  * DATA REGISTER DIRECT 
+A_Mode          DC.B    'A', 0  * ADDRESS REGISTER DIRECT
+Plus_sign       DC.B    '+', 0
+Minus_sign      DC.B    '-', 0
+Open_pars       DC.B    '(', 0  * OPEN PARENTHESIS
+Close_pars      DC.B    ')', 0  * CLOSE PARENTHIS
+Hash_sign       DC.B    '#', 0  * HASH SIGN
+Dollar_sign     DC.B    '$', 0  * DOLLAR SIGN
+Comma           DC.B    ',', 0  * COMMA
+*DATA_SIZE       DC.B    %0000
+Invalid_EA      DC.B    '$WXYZ', 0
+
                 END    START
+
+
+
+
 
 
 
