@@ -367,8 +367,119 @@ BLE_OPCODE
                 
 LEA_NOP_NOT_JSR_RTS_OPCODE  
                 
+                JSR             SPLIT_AFTER_OPCODE
                 
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                
+                CMP.B           #%001, D3
+                BEQ             NOP_NOTW_RTS_OPCODE
+                
+                CMP.B           #%111, D3
+                BEQ             LEA_OPCODE
+                
+                CMP.B           #%000, D3
+                BEQ             NOTB_OPCODE
+                
+                CMP.B           #%010, D3
+                BEQ             NOTL_JSR_OPCODE
                               
+                BRA             AFTER_OPCODE_DECODE
+                
+NOP_NOTW_RTS_OPCODE
+
+                MOVE.W          FIRST_THREE_BITS_AFTER_OPCODE, D3
+                
+                CMP.B           #%111, D3
+                BEQ             NOP_RTS_OPCODE
+                
+                CMP.B           #%011, D3
+                BEQ             NOTW_OPCODE
+
+                BRA             AFTER_OPCODE_DECODE
+                
+NOP_RTS_OPCODE
+                MOVE.W          FOURTH_THREE_BITS_AFTER_OPCODE, D3
+                
+                CMP.B           #%001, D3
+                BEQ             NOP_OPCODE
+                
+                CMP.B           #%101, D3
+                BEQ             RTS_OPCODE
+                   
+                BRA             AFTER_OPCODE_DECODE
+                
+NOP_OPCODE
+                LEA             NOP_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+
+                BRA             AFTER_OPCODE_DECODE
+                
+RTS_OPCODE
+                LEA             RTS_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+NOTW_OPCODE
+                LEA             NOTW_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+LEA_OPCODE
+                LEA             LEA_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE
+                
+NOTB_OPCODE
+                LEA             NOTB_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+        
+                BRA             AFTER_OPCODE_DECODE
+                
+NOTL_JSR_OPCODE
+                MOVE.W          FIRST_THREE_BITS_AFTER_OPCODE, D3
+                
+                CMP.B           #%111, D3
+                BEQ             JSR_OPCODE
+                
+                CMP.B           #%011, D3
+                BEQ             NOTL_OPCODE
+
+                BRA             AFTER_OPCODE_DECODE
+                
+JSR_OPCODE
+                LEA             JSR_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+
+                BRA             AFTER_OPCODE_DECODE
+                
+NOTL_OPCODE
+                LEA             NOTL_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+
                 BRA             AFTER_OPCODE_DECODE
 
 LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
@@ -990,7 +1101,13 @@ BRA_OPCODE_STRING       DC.B 'BRA',0
 BEQ_OPCODE_STRING       DC.B 'BEQ',0
 BGT_OPCODE_STRING       DC.B 'BGT',0
 BLE_OPCODE_STRING       DC.B 'BLE',0
-
+LEA_OPCODE_STRING       DC.B 'LEA',0
+NOTB_OPCODE_STRING      DC.B 'NOT.B',0
+NOTW_OPCODE_STRING      DC.B 'NOT.W',0
+NOTL_OPCODE_STRING      DC.B 'NOT.L',0
+JSR_OPCODE_STRING       DC.B 'JSR',0
+RTS_OPCODE_STRING       DC.B 'RTS',0
+NOP_OPCODE_STRING       DC.B 'NOP',0
 
 D_Mode          DC.B    'D', 0  * DATA REGISTER DIRECT 
 A_Mode          DC.B    'A', 0  * ADDRESS REGISTER DIRECT
