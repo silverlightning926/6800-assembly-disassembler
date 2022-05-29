@@ -484,9 +484,49 @@ NOTL_OPCODE
 
 LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
                 
+                JSR             SPLIT_AFTER_OPCODE
                 
+                CMP.B           #%000, D3
+                BEQ             ASL_ASR_OPCODE
+                
+                CMP.B           #%001, D3
+                BEQ             LSL_LSR_OPCODE
+                
+                CMP.B           #%011, D3
+                BEQ             ROL_ROR_OPCODE                
                 
                 BRA             AFTER_OPCODE_DECODE
+                
+LSL_LSR_OPCODE
+                LEA             LS_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_DIRECTION
+                JSR             PRINT_SPACE
+                            
+                BRA             AFTER_OPCODE_DECODE
+                
+ASL_ASR_OPCODE
+                LEA             AS_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_DIRECTION
+                JSR             PRINT_SPACE
+
+                BRA             AFTER_OPCODE_DECODE
+                
+ROL_ROR_OPCODE
+                LEA             RO_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_DIRECTION
+                JSR             PRINT_SPACE
+                
+                BRA             AFTER_OPCODE_DECODE              
+
 
 *------------------------------- EA ---------------------------------------- 
 
@@ -890,14 +930,41 @@ PRINT_SIZE_CODE
                 
                 MOVE.B          #1, D2                                      *TO INDICATE OPMODE TO ADD AND SUB
                 
+                RTS
+                
 NO_CHANGE       RTS
+                
                 
 PRINT_ADDA_SIZE_CODE
                 MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                
                 CMP.B           #%011, D3
                 BEQ             PRINT_WORD
+                
                 CMP.B           #%111, D3
                 BEQ             PRINT_LONG
+                
+                RTS
+                
+PRINT_DIRECTION MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                LSL             #3, D3
+                
+                CMP.B           #%001, D3
+                BEQ             PRINT_LEFT
+                
+                CMP.B           #%000, D3
+                BEQ             PRINT_RIGHT
+                
+                RTS
+                
+PRINT_LEFT      LEA             LEFT, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                RTS
+                
+PRINT_RIGHT     LEA             RIGHT, A1
+                MOVE.B          #14, D0
+                TRAP            #15
                 RTS
                 
 PRINT_BYTE      LEA             BYTE, A1
@@ -1079,6 +1146,9 @@ STRINGD	        DC.B 'D',0
 STRINGE	        DC.B 'E',0
 STRINGF	        DC.B 'F',0
 
+LEFT            DC.B 'L',0
+RIGHT           DC.B 'R',0
+
 BYTE            DC.B 'B',0
 WORD            DC.B 'W',0
 LONG            DC.B 'L',0
@@ -1108,6 +1178,10 @@ NOTL_OPCODE_STRING      DC.B 'NOT.L',0
 JSR_OPCODE_STRING       DC.B 'JSR',0
 RTS_OPCODE_STRING       DC.B 'RTS',0
 NOP_OPCODE_STRING       DC.B 'NOP',0
+LS_OPCODE_STRING        DC.B 'LS',0
+AS_OPCODE_STRING        DC.B 'AS',0
+RO_OPCODE_STRING        DC.B 'RO',0
+
 
 D_Mode          DC.B    'D', 0  * DATA REGISTER DIRECT 
 A_Mode          DC.B    'A', 0  * ADDRESS REGISTER DIRECT
@@ -1122,6 +1196,8 @@ Comma           DC.B    ',', 0  * COMMA
 Invalid_EA      DC.B    '$WXYZ', 0
 
                 END    START
+
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
