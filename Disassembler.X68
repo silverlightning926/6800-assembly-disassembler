@@ -11,6 +11,7 @@ SECOND_THREE_BITS_AFTER_OPCODE  EQU $210
 THIRD_THREE_BITS_AFTER_OPCODE   EQU $220
 FOURTH_THREE_BITS_AFTER_OPCODE  EQU $230
 DATA_SIZE                       EQU $240
+CURRENT_ADDR                    EQU $250
 
 CR                              EQU $0D               
 LF                              EQU $0A
@@ -80,11 +81,13 @@ RETURN          RTS
 
 MAIN            MOVEA.L        D5, A2                        * START READING FROM D5(STARTING ADDRESS)            
                 
-READ_OPCODE     JSR             PRINT_MEM_ADDR
-                JSR             PRINT_SPACE
+READ_OPCODE     
                 CLR.L           D3                            * WE WILL STORE EACH WORD FROM CURRENT INSTRUCTION IN D3
                 CMP.W           A2, D6
-                BLT             EXIT_MAIN_LOOP                                                              
+                BLT             EXIT_MAIN_LOOP    
+                JSR             PRINT_MEM_ADDR
+                JSR             PRINT_SPACE
+                MOVE.L          A2, CURRENT_ADDR                                                                 
                 MOVE.W          (A2)+, D3                     * RETRIEVE OPCODE OF CURRENT INSTRUCTION
                 
 *------------------------- DECODE OPCODE -----------------------------------
@@ -176,7 +179,7 @@ ADD_OPCODE
                 JSR             PRINT_SIZE_CODE
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_ADD_EA
             
 ADDA_OPCODE
                 LEA             ADDA_OPCODE_STRING, A1
@@ -185,7 +188,8 @@ ADDA_OPCODE
                 
                 JSR             PRINT_ADDA_SIZE_CODE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_ADDA_EA
+
                 
 ADDQ_OPCODE
                 LEA             ADDQ_OPCODE_STRING, A1
@@ -198,7 +202,8 @@ ADDQ_OPCODE
                 
                 MOVE.W          HEXBITS, D3
                 
-                BRA             AFTER_OPCODE_DECODE                
+                BRA             P_ADDQ_EA
+                
     
 CMP_OPCODE  
                 LEA             CMP_OPCODE_STRING, A1
@@ -209,7 +214,7 @@ CMP_OPCODE
                 JSR             PRINT_SIZE_CODE
                 JSR             PRINT_SPACE 
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_CMP_EA
 
 OR_OPCODE
                 LEA             OR_OPCODE_STRING, A1
@@ -249,18 +254,21 @@ MOVEB_OPCODE
                 MOVE.B          #14, D0
                 TRAP            #15
                 
+                JSR             SPLIT_AFTER_OPCODE
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_MOVEB_EA
                 
 MOVEQ_OPCODE
                 LEA             MOVEQ_OPCODE_STRING, A1
                 MOVE.B          #14, D0
                 TRAP            #15
                 
+                JSR             SPLIT_AFTER_OPCODE
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_MOVEQ_EA
+
                 
 MOVEW_MOVEAW_OPCODE
                 JSR             SPLIT_AFTER_OPCODE
@@ -276,7 +284,8 @@ MOVEW_MOVEAW_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_MOVEW_EA
+
                 
 MOVEAW_OPCODE
                 LEA             MOVEAW_OPCODE_STRING, A1
@@ -285,7 +294,8 @@ MOVEAW_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_MOVEAW_EA
+
         
 MOVEL_MOVEAL_OPCODE
                 JSR             SPLIT_AFTER_OPCODE
@@ -301,7 +311,8 @@ MOVEL_MOVEAL_OPCODE
                 
                 JSR             PRINT_SPACE
                                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_MOVEL_EA
+
                 
 MOVEAL_OPCODE
                 LEA             MOVEAL_OPCODE_STRING, A1
@@ -310,9 +321,11 @@ MOVEAL_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_MOVEAL_EA
+
                 
 BCC_BRA_OPCODE
+                ADD.L           #$2, CURRENT_ADDR       *PC VALUE
                 MOVE.W          HEXBITS, D3
                 LSL             #4, D3
                 LSL             #4, D3
@@ -350,7 +363,7 @@ BRA_OPCODE
                 
                 JSR             PRINT_SPACE
 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_BCC_BRA_EA
                 
 BEQ_OPCODE      
                 LEA             BEQ_OPCODE_STRING, A1
@@ -359,7 +372,7 @@ BEQ_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_BCC_BRA_EA
                 
 BGT_OPCODE
                 LEA             BGT_OPCODE_STRING, A1
@@ -368,7 +381,7 @@ BGT_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_BCC_BRA_EA
                 
 BLE_OPCODE
                 LEA             BLE_OPCODE_STRING, A1
@@ -377,7 +390,7 @@ BLE_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_BCC_BRA_EA
                 
 LEA_NOP_NOT_JSR_RTS_OPCODE  
                 
@@ -429,7 +442,7 @@ NOP_OPCODE
                 
                 JSR             PRINT_SPACE
 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_NOP_RTS_EA
                 
 RTS_OPCODE
                 LEA             RTS_OPCODE_STRING, A1
@@ -438,7 +451,7 @@ RTS_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_NOP_RTS_EA
                 
 NOTW_OPCODE
                 LEA             NOTW_OPCODE_STRING, A1
@@ -447,7 +460,7 @@ NOTW_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_NOT_JSR_EA
                 
 LEA_OPCODE
                 LEA             LEA_OPCODE_STRING, A1
@@ -456,7 +469,8 @@ LEA_OPCODE
                 
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_LEA_EA
+
                 
 NOTB_OPCODE
                 LEA             NOTB_OPCODE_STRING, A1
@@ -465,7 +479,8 @@ NOTB_OPCODE
                 
                 JSR             PRINT_SPACE
         
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_NOT_JSR_EA
+
                 
 NOTL_JSR_OPCODE
                 MOVE.W          FIRST_THREE_BITS_AFTER_OPCODE, D3
@@ -485,7 +500,7 @@ JSR_OPCODE
                 
                 JSR             PRINT_SPACE
 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_NOT_JSR_EA
                 
 NOTL_OPCODE
                 LEA             NOTL_OPCODE_STRING, A1
@@ -494,7 +509,7 @@ NOTL_OPCODE
                 
                 JSR             PRINT_SPACE
 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_NOT_JSR_EA
 
 LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
                 
@@ -519,7 +534,7 @@ LSL_LSR_OPCODE
                 JSR             PRINT_DIRECTION
                 JSR             PRINT_SPACE
                             
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
                 
 ASL_ASR_OPCODE
                 LEA             AS_OPCODE_STRING, A1
@@ -529,7 +544,7 @@ ASL_ASR_OPCODE
                 JSR             PRINT_DIRECTION
                 JSR             PRINT_SPACE
 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
                 
 ROL_ROR_OPCODE
                 LEA             RO_OPCODE_STRING, A1
@@ -539,31 +554,96 @@ ROL_ROR_OPCODE
                 JSR             PRINT_DIRECTION
                 JSR             PRINT_SPACE
                 
-                BRA             AFTER_OPCODE_DECODE              
+                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA              
 
 INVALID_OPCODE  
                 LEA             INVALID_OPCODE_STRING, A1
                 MOVE.B          #14, D0
                 TRAP            #15
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             P_INVALID_EA
                 
 *------------------------------- EA ---------------------------------------- 
 
-AFTER_OPCODE_DECODE
 
 P_INVALID_EA  
     
 P_ADD_EA  
+              CMP.B       #1, D2                                          * CHECK WHICH OPMODE
+              BEQ         P_ADD_DnFIRST_EA                                * Dn + < ea > -> < ea >
+              
+              MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1               * EA MODE , <EA> + Dn -> Dn
+              MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+              MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE       
+              JSR         EA_MODE_TABLE
+              JSR         COMMA_PRINT
+              
+              MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4   
+              JSR         Dn_Mode_Print
+              
+              BRA         INSTRUC_DONE
+              
+P_ADD_DnFIRST_EA                        * Dn + < ea > -> < ea >
 
-P_ADDA_EA
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR         Dn_Mode_Print         
+                JSR         COMMA_PRINT
+                
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE
+                JSR         EA_MODE_TABLE 
+ 
+                BRA         INSTRUC_DONE
+                
+                
+P_ADDA_EA                         * ADDA <EA>, AN
+               
+                MOVE.W     FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.L     THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W     SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE
+                JSR        EA_MODE_TABLE
+                
+                JSR        COMMA_PRINT
+                
+                MOVE.W     FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR        An_Mode_Print
+                
+                BRA         INSTRUC_DONE
 
                 
 P_ADDQ_EA
+                LEA        Hash_sign, a1
+                MOVE.B     #14, D0
+                TRAP       #15
+                
+                MOVE.W     FIRST_THREE_BITS_AFTER_OPCODE, D1
+                CMP.W      #%0000, D1                         * IF THE DATA IS %000, IT'S 8 (%1000).
+                BEQ        ADDQ_OVERFLOW
+OVERFLOWA_FIXED JSR        PRINT_IMMEDIATE
+                JSR        COMMA_PRINT
+                
+                MOVE.W     THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W     FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                JSR        EA_MODE_TABLE
+                
+                BRA         INSTRUC_DONE   
+                
+ADDQ_OVERFLOW
+                MOVE.W     #%1000, D1
+                BRA        OVERFLOWA_FIXED
            
     
 P_CMP_EA  
+                MOVE.W     THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W     FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W     SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE
+                JSR        EA_MODE_TABLE
+                JSR        COMMA_PRINT
                 
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR         Dn_Mode_Print 
+                BRA         INSTRUC_DONE
 
 P_SUB_EA
     
@@ -624,29 +704,127 @@ P_AND_OR_DnFIRST_EA
                 
                 BRA         INSTRUC_DONE       
 
-P_MOVEB_EA
 
+P_MOVEB_EA       * MOVE <EA>, <EA>
+                MOVE.W       THIRD_THREE_BITS_AFTER_OPCODE, D1  
+                MOVE.W       FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W       #%0001, DATA_SIZE
+               
+                JSR          EA_MODE_TABLE
+                JSR          COMMA_PRINT
+                
+                MOVE.W       FIRST_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W       SECOND_THREE_BITS_AFTER_OPCODE, D1
+               
+                JSR          EA_MODE_TABLE
+                BRA         INSTRUC_DONE 
                 
 P_MOVEQ_EA
-
+                LEA        Hash_sign, a1
+                MOVE.B     #14, D0
+                TRAP       #15
+                
+                MOVE.W      HEXBITS, D3
+                AND.W       #$00FF,D3                * GET RID OF THE FIRST 8 BITS
+                MOVE.W      D3, D1
+                
+                
+                JSR         PRINT_IMMEDIATE
+                JSR         COMMA_PRINT
+                
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR         Dn_Mode_Print 
+                
+                BRA         INSTRUC_DONE
                 
 P_MOVEW_EA
-
-P_MOVEAW_EA
-
+                MOVE.W       THIRD_THREE_BITS_AFTER_OPCODE, D1  
+                MOVE.W       FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W       #%0011, DATA_SIZE
+               
+                JSR          EA_MODE_TABLE
+                JSR          COMMA_PRINT
                 
+                MOVE.W       FIRST_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W       SECOND_THREE_BITS_AFTER_OPCODE, D1
+               
+                JSR          EA_MODE_TABLE
+                BRA         INSTRUC_DONE 
+                
+P_MOVEAW_EA
+                MOVE.W       THIRD_THREE_BITS_AFTER_OPCODE, D1  
+                MOVE.W       FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W       #%0011, DATA_SIZE
+               
+                JSR          EA_MODE_TABLE
+                JSR          COMMA_PRINT
+                
+                MOVE.W       FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR          An_Mode_Print
+                
+                BRA         INSTRUC_DONE
 
         
 P_MOVEL_EA
-
+                MOVE.W       THIRD_THREE_BITS_AFTER_OPCODE, D1  
+                MOVE.W       FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W       #%0010, DATA_SIZE
+               
+                JSR          EA_MODE_TABLE
+                JSR          COMMA_PRINT
+                
+                MOVE.W       FIRST_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W       SECOND_THREE_BITS_AFTER_OPCODE, D1
+               
+                JSR          EA_MODE_TABLE
+                BRA         INSTRUC_DONE
                 
 P_MOVEAL_EA
-
+                MOVE.W       THIRD_THREE_BITS_AFTER_OPCODE, D1  
+                MOVE.W       FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W       #%0010, DATA_SIZE
+               
+                JSR          EA_MODE_TABLE
+                JSR          COMMA_PRINT
+                
+                MOVE.W       FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR          An_Mode_Print
+                
+                BRA         INSTRUC_DONE
                 
 P_BCC_BRA_EA
+                MOVE.W      HEXBITS, D1
+                AND.L       #$000000FF, D1              * GET RID OF ALL BITS EXCEPT DISPLACEMENT
+                CMP.B       #$00, D1
+                BEQ         BRA_HELPER_16BITS              
+                CMP.B       #$FF, D1
+                BEQ         BRA_HELPER_32BITS
+GOT_DISPLACE    ADD.L       CURRENT_ADDR, D1            * D1 NOW HAS THE ADDRESS TO BRANCH
 
+                LEA         Dollar_sign, A1                     * PRINT DOLLAR SIGN
+                MOVE.B      #14, D0
+                TRAP        #15
+                
+                JSR         TRAP_PRINT 
+                BRA         INSTRUC_DONE
+BRA_HELPER_16BITS
+                MOVE.W      (A2)+, D1  
+                BRA         GOT_DISPLACE      
+BRA_HELPER_32BITS
+                MOVE.L      (A2)+, D1  
+                BRA         GOT_DISPLACE         
                 
 P_LEA_EA  
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                JSR         EA_MODE_TABLE
+                JSR         COMMA_PRINT
+                
+                MOVE.W       FIRST_THREE_BITS_AFTER_OPCODE, D4
+                JSR          An_Mode_Print
+                
+                BRA         INSTRUC_DONE
+
 
 P_NOP_RTS_EA 
                 BRA         INSTRUC_DONE
@@ -658,6 +836,54 @@ P_NOT_JSR_EA
                                     
 
 P_LSL_LSR_ASL_ASR_ROL_ROR_EA
+
+                CMP.W       #%0011, SECOND_THREE_BITS_AFTER_OPCODE            * CHECKS IF IT IS REGISTER SHIFT OR MEMORY SHIFT
+                BEQ         MEMORY_SHIFT
+                CMP.W       #%0111, SECOND_THREE_BITS_AFTER_OPCODE 
+                BEQ         MEMORY_SHIFT
+                                                                              * LSd Dx,Dy  (OR) LSd #<data> ,Dy
+                                                                              
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D3
+                LSL         #2, D3                                            * GET ACCESS TO I/R BIT
+                                                                              
+                CMP.B       #0, D3                                           * THIS MEANS IMMEDIATE DATA SHIFT   
+                BEQ         IMMEDIATE_SHIFT
+                                                                              * LSd Dx,Dy
+                                                                              
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4    
+                JSR         Dn_Mode_Print 
+                JSR         COMMA_PRINT
+
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4    
+                JSR         Dn_Mode_Print 
+                BRA         INSTRUC_DONE                                                        
+
+                                           
+IMMEDIATE_SHIFT                                                               * LSd #<data> ,Dy
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D1
+                CMP.W       #%0000, D1                                        * THIS MEANS SHIFT COUNT IS 8
+                BEQ         SHIFT_COUNT_OVERFLOW
+OVERFLOWS_FIXED LEA         Hash_sign, A1                                     * LOAD AT ADDRESS OF HASH SIGN TO A1
+                MOVE.B      #14 , D0
+                TRAP        #15
+                JSR         TRAP_PRINT
+                JSR         COMMA_PRINT
+                
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4    
+                JSR         Dn_Mode_Print 
+                BRA         INSTRUC_DONE  
+                
+
+SHIFT_COUNT_OVERFLOW
+                MOVE.W      #%1000, D1
+                BRA         OVERFLOWS_FIXED               
+                
+MEMORY_SHIFT                                                                  * LSd <ea>
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                JSR         EA_MODE_TABLE
+                BRA         INSTRUC_DONE
+
 
 
 *------------------------------ EA SUBROUTINES -------------------------------                
@@ -811,7 +1037,7 @@ IMMEDIATE_PRINT
               CMP.W   #%0010, DATA_SIZE           * COMPARE TO TO SEE THE IMMEDIATE DATA SIZE
               BEQ     IMD_LONG                    * LONG SIZE 
               CMP.W   #%0110, DATA_SIZE           * COMPARE TO TO SEE THE IMMEDIATE DATA SIZE
-              BEQ     IMD_LONG                    * LONG SIZE 
+              BGE     IMD_LONG                    * LONG SIZE 
               BRA     IMD_WORD                    * WORD SIZE 
                 
 IMD_LONG         
@@ -830,9 +1056,7 @@ PRINT_IMMEDIATE                                   * $#
               MOVE.B #14, D0
               TRAP #15
               
-              MOVEQ #15, D0                      
-              MOVEQ #16, D2                      
-              TRAP #15                           * INTERUPT
+              JSR TRAP_PRINT
               RTS                
                 
 IMD_DATA_PRINT                                      
@@ -932,27 +1156,28 @@ SPLIT_AFTER_OPCODE
 PRINT_SIZE_CODE
                 CLR             D2
                 MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
-                CMP.B           #%000, D3
-                BEQ             PRINT_BYTE
-                CMP.B           #%001, D3
-                BEQ             PRINT_WORD
-                CMP.B           #%010, D3
-                BEQ             PRINT_LONG
+                
+                CMP.B           #%100, D3
+                BLT             NO_CHANGE
+                
+                MOVE.B          #1, D2                                      *TO INDICATE OPMODE TO ADD AND SUB
+               
                 CMP.B           #%100, D3
                 BEQ             PRINT_BYTE
                 CMP.B           #%101, D3
                 BEQ             PRINT_WORD
                 CMP.B           #%110, D3
                 BEQ             PRINT_LONG
-               
-                CMP.B           #%100, D3
-                BLT             NO_CHANGE
                 
-                MOVE.B          #1, D2                                      *TO INDICATE OPMODE TO ADD AND SUB
+NO_CHANGE       CMP.B           #%000, D3
+                BEQ             PRINT_BYTE
+                CMP.B           #%001, D3
+                BEQ             PRINT_WORD
+                CMP.B           #%010, D3
+                BEQ             PRINT_LONG
                 
                 RTS
-                
-NO_CHANGE       RTS
+
                 
                 
 PRINT_ADDA_SIZE_CODE
@@ -1216,6 +1441,7 @@ Comma           DC.B    ',', 0  * COMMA
 Invalid_EA      DC.B    '$WXYZ', 0
 
                 END    START
+
 
 
 *~Font name~Courier New~
