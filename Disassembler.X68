@@ -136,15 +136,6 @@ READ_OPCODE     JSR             PRINT_MEM_ADDR
                 BEQ             LSL_LSR_ASL_ASR_ROL_ROR_OPCODE      * IF EQUAL GO TO LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
                 
                 JSR INVALID_OPCODE                                  * IF NOT EQUAL TO ABOVE OPCODE, ASSUME INVALID OPCODE/DATA
-                
-INVALID_OPCODE  
-                LEA             INVALID_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
-                
-                
-                
-                BRA             AFTER_OPCODE_DECODE
     
 ADD_ADDA_OPCODE  
                 JSR             SPLIT_AFTER_OPCODE
@@ -153,9 +144,31 @@ ADD_ADDA_OPCODE
                 
                 CMP.B           #%011, D3
                 BEQ             ADDA_OPCODE
+                
                 CMP.B           #%111, D3
                 BEQ             ADDA_OPCODE
                 
+                CMP.B           #%000, D3
+                BEQ             ADD_OPCODE
+                
+                CMP.B           #%001, D3
+                BEQ             ADD_OPCODE
+                
+                CMP.B           #%010, D3
+                BEQ             ADD_OPCODE
+                
+                CMP.B           #%100, D3
+                BEQ             ADD_OPCODE
+                
+                CMP.B           #%101, D3
+                BEQ             ADD_OPCODE
+                
+                CMP.B           #%110, D3
+                BEQ             ADD_OPCODE
+                
+                BRA             INVALID_OPCODE
+      
+ADD_OPCODE
                 LEA             ADD_OPCODE_STRING, A1
                 MOVE.B          #14, D0
                 TRAP            #15
@@ -164,7 +177,7 @@ ADD_ADDA_OPCODE
                 JSR             PRINT_SPACE
                 
                 BRA             AFTER_OPCODE_DECODE
-                
+            
 ADDA_OPCODE
                 LEA             ADDA_OPCODE_STRING, A1
                 MOVE.B          #14, D0
@@ -288,7 +301,6 @@ MOVEL_MOVEAL_OPCODE
                 
                 JSR             PRINT_SPACE
                                 
-                
                 BRA             AFTER_OPCODE_DECODE
                 
 MOVEAL_OPCODE
@@ -328,6 +340,8 @@ BCC_BRA_OPCODE
                 
                 CMP.B           #%1111, D3
                 BEQ             BLE_OPCODE
+                
+                BRA             INVALID_OPCODE
                 
 BRA_OPCODE
                 LEA             BRA_OPCODE_STRING, A1
@@ -383,7 +397,7 @@ LEA_NOP_NOT_JSR_RTS_OPCODE
                 CMP.B           #%010, D3
                 BEQ             NOTL_JSR_OPCODE
                               
-                BRA             AFTER_OPCODE_DECODE
+                BRA             INVALID_OPCODE
                 
 NOP_NOTW_RTS_OPCODE
 
@@ -395,7 +409,7 @@ NOP_NOTW_RTS_OPCODE
                 CMP.B           #%011, D3
                 BEQ             NOTW_OPCODE
 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             INVALID_OPCODE
                 
 NOP_RTS_OPCODE
                 MOVE.W          FOURTH_THREE_BITS_AFTER_OPCODE, D3
@@ -406,7 +420,7 @@ NOP_RTS_OPCODE
                 CMP.B           #%101, D3
                 BEQ             RTS_OPCODE
                    
-                BRA             AFTER_OPCODE_DECODE
+                BRA             INVALID_OPCODE
                 
 NOP_OPCODE
                 LEA             NOP_OPCODE_STRING, A1
@@ -462,7 +476,7 @@ NOTL_JSR_OPCODE
                 CMP.B           #%011, D3
                 BEQ             NOTL_OPCODE
 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             INVALID_OPCODE
                 
 JSR_OPCODE
                 LEA             JSR_OPCODE_STRING, A1
@@ -495,7 +509,7 @@ LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
                 CMP.B           #%011, D3
                 BEQ             ROL_ROR_OPCODE                
                 
-                BRA             AFTER_OPCODE_DECODE
+                BRA             INVALID_OPCODE
                 
 LSL_LSR_OPCODE
                 LEA             LS_OPCODE_STRING, A1
@@ -527,7 +541,13 @@ ROL_ROR_OPCODE
                 
                 BRA             AFTER_OPCODE_DECODE              
 
-
+INVALID_OPCODE  
+                LEA             INVALID_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                BRA             AFTER_OPCODE_DECODE
+                
 *------------------------------- EA ---------------------------------------- 
 
 AFTER_OPCODE_DECODE
@@ -1153,7 +1173,7 @@ BYTE            DC.B 'B',0
 WORD            DC.B 'W',0
 LONG            DC.B 'L',0
 
-INVALID_OPCODE_STRING   DC.B 'DATA',0
+INVALID_OPCODE_STRING   DC.B 'DATA $WXYZ',0
 CMP_OPCODE_STRING       DC.B 'CMP.',0
 ADD_OPCODE_STRING       DC.B 'ADD.',0
 ADDA_OPCODE_STRING      DC.B 'ADDA.',0
