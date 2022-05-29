@@ -561,6 +561,8 @@ INVALID_OPCODE
                 MOVE.B          #14, D0
                 TRAP            #15
                 
+                JSR             PRINT_SPACE
+                
                 BRA             P_INVALID_EA
                 
 *------------------------------- EA ---------------------------------------- 
@@ -1398,7 +1400,7 @@ BYTE            DC.B 'B',0
 WORD            DC.B 'W',0
 LONG            DC.B 'L',0
 
-INVALID_OPCODE_STRING   DC.B 'DATA $WXYZ',0
+INVALID_OPCODE_STRING   DC.B 'DATA',0
 CMP_OPCODE_STRING       DC.B 'CMP.',0
 ADD_OPCODE_STRING       DC.B 'ADD.',0
 ADDA_OPCODE_STRING      DC.B 'ADDA.',0
@@ -1441,6 +1443,7 @@ Comma           DC.B    ',', 0  * COMMA
 Invalid_EA      DC.B    '$WXYZ', 0
 
                 END    START
+
 
 
 
