@@ -509,6 +509,8 @@ LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
                 
                 JSR             SPLIT_AFTER_OPCODE
                 
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                
                 CMP.B           #%000, D3
                 BEQ             ASL_ASR_OPCODE
                 
@@ -526,6 +528,8 @@ LSL_LSR_OPCODE
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
+                JSR             PRINT_SIZE_CODE
+                
                 JSR             PRINT_SPACE
                             
                 BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
@@ -536,6 +540,8 @@ ASL_ASR_OPCODE
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
+                JSR             PRINT_SIZE_CODE
+                
                 JSR             PRINT_SPACE
 
                 BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
@@ -546,6 +552,8 @@ ROL_ROR_OPCODE
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
+                JSR             PRINT_SIZE_CODE
+
                 JSR             PRINT_SPACE
                 
                 BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA              
@@ -1188,7 +1196,7 @@ PRINT_ADDA_SIZE_CODE
                 RTS
                 
 PRINT_DIRECTION MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
-                LSL             #3, D3
+                LSR             #2, D3
                 
                 CMP.B           #%001, D3
                 BEQ             PRINT_LEFT
@@ -1387,8 +1395,8 @@ STRINGD	        DC.B 'D',0
 STRINGE	        DC.B 'E',0
 STRINGF	        DC.B 'F',0
 
-LEFT            DC.B 'L',0
-RIGHT           DC.B 'R',0
+LEFT            DC.B 'L.',0
+RIGHT           DC.B 'R.',0
 
 BYTE            DC.B 'B',0
 WORD            DC.B 'W',0
