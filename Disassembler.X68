@@ -327,20 +327,14 @@ MOVEAL_OPCODE
 BCC_BRA_OPCODE
                 ADD.L           #$2, CURRENT_ADDR       *PC VALUE
                 MOVE.W          HEXBITS, D3
-                LSL             #4, D3
-                LSL             #4, D3
-                LSL             #4, D3
-                LSL             #4, D3
+                
                 LSL             #4, D3
                 
                 LSR             #4, D3
                 LSR             #4, D3
                 LSR             #4, D3
-                LSR             #4, D3
-                LSR             #4, D3
-                LSR             #4, D3
-                LSR             #4, D3
-                LSR             #4, D3
+                
+                MOVE.L           D3, A4
                 
                 CMP.B           #%0000, D3
                 BEQ             BRA_OPCODE
