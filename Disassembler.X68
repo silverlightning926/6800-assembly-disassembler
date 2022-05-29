@@ -528,7 +528,6 @@ LSL_LSR_OPCODE
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
-                JSR             PRINT_SIZE_CODE
                 
                 JSR             PRINT_SPACE
                             
@@ -540,7 +539,6 @@ ASL_ASR_OPCODE
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
-                JSR             PRINT_SIZE_CODE
                 
                 JSR             PRINT_SPACE
 
@@ -552,7 +550,6 @@ ROL_ROR_OPCODE
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
-                JSR             PRINT_SIZE_CODE
 
                 JSR             PRINT_SPACE
                 
@@ -1395,8 +1392,8 @@ STRINGD	        DC.B 'D',0
 STRINGE	        DC.B 'E',0
 STRINGF	        DC.B 'F',0
 
-LEFT            DC.B 'L.',0
-RIGHT           DC.B 'R.',0
+LEFT            DC.B 'L',0
+RIGHT           DC.B 'R',0
 
 BYTE            DC.B 'B',0
 WORD            DC.B 'W',0
@@ -1445,6 +1442,7 @@ Comma           DC.B    ',', 0  * COMMA
 Invalid_EA      DC.B    '$WXYZ', 0
 
                 END    START
+
 
 
 
