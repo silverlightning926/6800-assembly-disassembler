@@ -334,8 +334,6 @@ BCC_BRA_OPCODE
                 LSR             #4, D3
                 LSR             #4, D3
                 
-                MOVE.L           D3, A4
-                
                 CMP.B           #%0000, D3
                 BEQ             BRA_OPCODE
                 
@@ -505,54 +503,121 @@ NOTL_OPCODE
 
                 BRA             P_NOT_JSR_EA
 
-LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
-                
+LSL_LSR_ASL_ASR_ROL_ROR_OPCODE           
                 JSR             SPLIT_AFTER_OPCODE
                 
                 MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
                 
-                CMP.B           #%000, D3
-                BEQ             ASL_ASR_OPCODE
+                LSL             #6,D3
+                LSL             #8,D3
+                LSR             #6,D3
+                LSR             #8,D3
+
+                CMP.B           #%11, D3                                       
+                BEQ             ADDR_SHIFT
                 
-                CMP.B           #%001, D3
-                BEQ             LSL_LSR_OPCODE
-                
-                CMP.B           #%011, D3
-                BEQ             ROL_ROR_OPCODE                
+                CMP.B           #%11, D3
+                BNE             REGISTER_SHIFT
                 
                 BRA             INVALID_OPCODE
+
+REGISTER_SHIFT         
+                MOVE.W          THIRD_THREE_BITS_AFTER_OPCODE, D3
                 
-LSL_LSR_OPCODE
+                LSL             #6,D3
+                LSL             #8,D3
+                LSR             #6,D3
+                LSR             #8,D3
+                
+                CMP.B           #%01, D3
+                BEQ             REGISTER_LSL_LSR_OPCODE
+                
+                CMP.B           #%00, D3
+                BEQ             REGISTER_ASL_ASR_OPCODE
+                
+                CMP.B           #%11, D3
+                BEQ             REGISTER_ROL_ROR_OPCODE
+                
+                BRA             INVALID_OPCODE
+
+REGISTER_LSL_LSR_OPCODE
                 LEA             LS_OPCODE_STRING, A1
                 MOVE.B          #14, D0
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
-                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SHIFT_SIZE_CODE
                 
                 JSR             PRINT_SPACE
                             
                 BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
                 
-ASL_ASR_OPCODE
+REGISTER_ASL_ASR_OPCODE
                 LEA             AS_OPCODE_STRING, A1
                 MOVE.B          #14, D0
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
-                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SHIFT_SIZE_CODE
                 
                 JSR             PRINT_SPACE
 
                 BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
                 
-ROL_ROR_OPCODE
+REGISTER_ROL_ROR_OPCODE
                 LEA             RO_OPCODE_STRING, A1
                 MOVE.B          #14, D0
                 TRAP            #15
                 
                 JSR             PRINT_DIRECTION
-                JSR             PRINT_SIZE_CODE
+                JSR             PRINT_SHIFT_SIZE_CODE
+
+                JSR             PRINT_SPACE
+                
+                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA  
+
+ADDR_SHIFT
+                MOVE.W          FIRST_THREE_BITS_AFTER_OPCODE, D3
+                
+                CMP.B           #%000, D3
+                BEQ             ADDR_ASL_ASR_OPCODE
+                
+                CMP.B           #%001, D3
+                BEQ             ADDR_LSL_LSR_OPCODE
+                
+                CMP.B           #%011, D3
+                BEQ             ADDR_ROL_ROR_OPCODE                
+                
+                BRA             INVALID_OPCODE
+               
+ADDR_LSL_LSR_OPCODE
+                LEA             LS_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_DIRECTION
+                
+                JSR             PRINT_SPACE
+                            
+                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
+                
+ADDR_ASL_ASR_OPCODE
+                LEA             AS_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_DIRECTION
+                
+                JSR             PRINT_SPACE
+
+                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
+                
+ADDR_ROL_ROR_OPCODE
+                LEA             RO_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_DIRECTION
 
                 JSR             PRINT_SPACE
                 
@@ -1194,8 +1259,9 @@ PRINT_ADDA_SIZE_CODE
                 BEQ             PRINT_LONG
                 
                 RTS
-                
-PRINT_DIRECTION MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+               
+PRINT_DIRECTION 
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
                 LSR             #2, D3
                 
                 CMP.B           #%001, D3
@@ -1204,6 +1270,24 @@ PRINT_DIRECTION MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
                 CMP.B           #%000, D3
                 BEQ             PRINT_RIGHT
                 
+                RTS
+                
+PRINT_SHIFT_SIZE_CODE
+                MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
+                LSL             #6,D3
+                LSL             #8,D3
+                LSR             #6,D3
+                LSR             #8,D3
+                
+                CMP.B           #%00, D3
+                BEQ             PRINT_BYTE
+                
+                CMP.B           #%01, D3
+                BEQ             PRINT_WORD
+                
+                CMP.B           #%10, D3
+                BEQ             PRINT_LONG
+
                 RTS
                 
 PRINT_LEFT      LEA             LEFT, A1
@@ -1395,21 +1479,21 @@ STRINGD	        DC.B 'D',0
 STRINGE	        DC.B 'E',0
 STRINGF	        DC.B 'F',0
 
-LEFT            DC.B 'L.',0
-RIGHT           DC.B 'R.',0
+LEFT            DC.B 'L',0
+RIGHT           DC.B 'R',0
 
-BYTE            DC.B 'B',0
-WORD            DC.B 'W',0
-LONG            DC.B 'L',0
+BYTE            DC.B '.B',0
+WORD            DC.B '.W',0
+LONG            DC.B '.L',0
 
 INVALID_OPCODE_STRING   DC.B 'DATA',0
-CMP_OPCODE_STRING       DC.B 'CMP.',0
-ADD_OPCODE_STRING       DC.B 'ADD.',0
-ADDA_OPCODE_STRING      DC.B 'ADDA.',0
-ADDQ_OPCODE_STRING      DC.B 'ADDQ.',0
-SUB_OPCODE_STRING       DC.B 'SUB.',0
-AND_OPCODE_STRING       DC.B 'AND.',0
-OR_OPCODE_STRING        DC.B 'OR.',0
+CMP_OPCODE_STRING       DC.B 'CMP',0
+ADD_OPCODE_STRING       DC.B 'ADD',0
+ADDA_OPCODE_STRING      DC.B 'ADDA',0
+ADDQ_OPCODE_STRING      DC.B 'ADDQ',0
+SUB_OPCODE_STRING       DC.B 'SUB',0
+AND_OPCODE_STRING       DC.B 'AND',0
+OR_OPCODE_STRING        DC.B 'OR',0
 MOVEB_OPCODE_STRING     DC.B 'MOVE.B',0
 MOVEQ_OPCODE_STRING     DC.B 'MOVEQ',0
 MOVEW_OPCODE_STRING     DC.B 'MOVE.W',0
@@ -1445,6 +1529,7 @@ Comma           DC.B    ',', 0  * COMMA
 Invalid_EA      DC.B    '$WXYZ', 0
 
                 END    START
+
 
 
 
