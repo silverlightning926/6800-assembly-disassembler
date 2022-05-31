@@ -1,11 +1,11 @@
 *-----------------------------------------------------------
 * Title      : Final Project
-* Written by : Group 4 - Arkar Kyaw Swar, Siddharth Rao, Eric Dang
+* Written by : Group 4 - Arkar Kyaw Swar, Siddharth Rao, Phu Thinh Dang
 * Date       : 06/02/2022
 * Description: 68K Disassembler
 *-----------------------------------------------------------
+STACK                           EQU $A000
 HEXBITS                         EQU $100
-
 FIRST_THREE_BITS_AFTER_OPCODE   EQU $200
 SECOND_THREE_BITS_AFTER_OPCODE  EQU $210
 THIRD_THREE_BITS_AFTER_OPCODE   EQU $220
@@ -16,31 +16,66 @@ CURRENT_ADDR                    EQU $250
 CR                              EQU $0D               
 LF                              EQU $0A
  
-                                ORG $1000  
+START:         ORG $1000                                     ; FIRST INSTRUCTION OF THE PROG
+               LEA STACK, A7                                 ; SET UP THE SP
+               
+*------------ INTRO AND SOME RULES FOR THE DISSAMBLER -----------------               
+              LEA RULE, A1
+              MOVE.B #14, D0
+              TRAP #15
+              
+              LEA STR_SPACE, A1                 * break a line for readability
+              MOVE.B #13, D0
+              TRAP #15
+              
+               
          
 *------------ PROMPT THE USER FOR ADDRESSES -----------------
-START:                  
-
-USER_INPUT      LEA            PROMPT1, A1                   * LOAD STARTING ADDRESS PROMPT TO A1
+USER_INPUT      
+                CLR.L          D1                            * NEED TO CLEAR THE PROMPT IF A USER WISHES TO CONTINUE READING A PROGRAM
+                * STARTING ADDRESS
+                LEA            PROMPT1, A1                   * LOAD STARTING ADDRESS PROMPT TO A1
                 MOVE.B         #14, D0                       * DISPLAY PROMPT
                 TRAP           #15
+                
                 LEA            EXTRA1, A1                    * TO READ IN USER INPUT         
                 MOVE.B         #2, D0                        * STORE USER INPUT STARTING ADDRESS STRING IN A1
                 TRAP           #15
+                
+                JSR            INPUT_VALID_SIZE              ; IF USER ACCIDENTALLY ENTER INVALID SIZE FOR THE INPUT
+                CMP.L          #$FF00, D1                    ; CLEARING SCREEN TASK 11
+                BEQ            USER_INPUT                    ; LOOP BACK TO ASK USER INPUT AGAIN
+ 
+                
                 MOVE.B         #0, D0                        * TO CHECK WHETHER STARTING OR ENDIND ADDRESS IN SUBROUTINE  
                 JSR            CONVERT
+                JSR            AFTER_CONVERT_CHECK           * CHECK IF IT IS VALID
+                CMP.L          #$FF00, D1                    
+                BEQ            USER_INPUT
                 
+                * ENDING ADDRESS
                 LEA            PROMPT2, A1                   * LOAD ENDING ADDRESS PROMPT TO A1
                 MOVE.B         #14, D0                       * DISPLAY PROMPT
                 TRAP           #15
+                
                 LEA            EXTRA2, A1                    * TO READ IN USER INPUT                              
                 MOVE.B         #2, D0                        * STORE USER INPUT ENDING ADDRESS STRING IN A1
                 TRAP           #15
+                
+                JSR            INPUT_VALID_SIZE              ; IF USER ACCIDENTALLY ENTER INVALID SIZE FOR THE INPUT
+                CMP.L          #$FF00, D1                    ; CLEARING SCREEN TASK 11
+                BEQ            USER_INPUT
+               
                 MOVE.B         #1, D0                        * TO CHECK WHETHER STARTING OR ENDIND ADDRESS IN SUBROUTINE   
                 JSR            CONVERT
+                JSR            AFTER_CONVERT_CHECK           * CHECK IF IF IT IS VAL
+                CMP.L          #$FF00, D1                    
+                BEQ            USER_INPUT
+
+                
                 BRA            MAIN
                 
-*------------ CONVERT THE ADDRESS STRINGS TO HEXADECIMAL VALUES -----------------
+**------------ CONVERT THE ADDRESS STRINGS TO HEXADECIMAL VALUES -----------------
                 
 CONVERT         CLR.L          D3                            * TO STORE ASCII VALUES
 
@@ -48,33 +83,91 @@ CONVERT         CLR.L          D3                            * TO STORE ASCII VA
                 MOVE.L         #8, D1                        * TERMINAL VALUE
                 MOVE.L         #0, D6                        * TO STORE HEXADECIMAL VALUES OF ADDRESSES 
                 
-CONVERT_LOOP    CMP.L          D2, D1                        * CHECK TO TERMINATE THE LOOP
+CONVERT_LOOP    
+                
+                CMP.L          D2, D1                        * CHECK TO TERMINATE THE LOOP
                 BEQ            EXIT_CONV_LOOP                * BRANCH TO NEXT PART IF ABOVE CONDITION IS MET 
                 
                 MOVE.B         (A1)+, D3                     * READ A BYTE FROM A1 (A HEXADECIMAL DIGIT)
                 
-                CMP.B          #$40,D3                       * IF ASCII CODE IS > $40, IT IS A LETTER
-                BGT            ASCII_TO_LETTER               * IF SO, BRANCH TO LETTER CONVERTER
+                CMP.B          #$39, D3                      * IF IT IS A LETTER OR NUMBER
+                BGT            LETTER_CONVERT                * LETTER
+                BLE            NUMBER_CONVERT                * NUMBER
+                            
+LETTER_CONVERT      
+                CMP.B          #$46, D3                      * if it is greater than F -> Invalid
+                BGT            INVALID_HEX_STRING                 
+                CMP.B          #$41,D3                       * IF ASCII CODE IS [41,46] , IT IS A LETTER
+                BGE            ASCII_TO_LETTER               * IF SO, BRANCH TO LETTER CONVERTER
+                BLT            INVALID_HEX_STRING            ; IF it is less than A, it's invalid
                 
-                CMP.B          #$3A,D3                       * IF ASCII CODE IS < $3A, IT IS A NUMBER
-                BLT            ASCII_TO_NUM                  * IF SO, BRANCH TO NUMBER CONVERTER
-                
+                ; NUMBER CHECK. SHOULD BE [0-9]
+NUMBER_CONVERT 
+                CMP.B          #$30,D3                      * LESS THAN 0-> INVALID
+                BLT            INVALID_HEX_STRING                         
+                CMP.B          #$39,D3                       * IF ASCII CODE IS < $3A, IT IS A NUMBER
+                BGT            INVALID_HEX_STRING            * GREATER THAN 9 -> INVALID
+                BLE            ASCII_TO_NUM                  * IF SO, BRANCH TO NUMBER CONVERTER
+                               
 ASCII_TO_LETTER SUB.B          #$37,D3                       * CONVERT TO LETTER              
                 BRA            SHIFT_AND_ADD                 
 
 ASCII_TO_NUM    SUB.B          #$30,D3                       * CONVERT TO NUM                    
                 
 SHIFT_AND_ADD   LSL.L          #4, D6                        * SHIFT 
-                ADD.B          D3, D6                        * ADD TO CURRENT VALUE 
+                ADD.B          D3, D6                        * ADD TO CURRENT VALUE
+                CMPI.B         #7, D2                        * ACCESS THE LAST BIT TO CHECK THE INPUT IS EVEN OR ODD
+                BEQ            EVEN_OR_ODD
                 BRA            CONT
             
 CONT            ADDQ.L         #1, D2
                 BRA            CONVERT_LOOP
                 
+INVALID_HEX_STRING
+                LEA             CANT_CONVERT, A1
+                MOVE.B          #14, D0
+                TRAP #15
+                
+                BRA             TRY_AGAIN_PROMPT
+                
 EXIT_CONV_LOOP  CMP.B          #0, D0
                 BNE            RETURN
                 MOVE.L         D6, D5
+                RTS
+
+EVEN_OR_ODD
+               BTST.L          #00, D6             ; ACCESS THE LAST BIT
+               BNE             ODD                 ; LAST BIT IS 1 -> ODD
+               BRA             EXIT_CONV_LOOP
+
+ODD            LEA             ODD_NUMBER, A1
+               MOVE.B          #14, D0
+               TRAP            #15
+               BRA             TRY_AGAIN_PROMPT 
+                                
+                
 RETURN          RTS
+
+AFTER_CONVERT_CHECK
+                CMP.L          #$00001000, D5               * NEED TO DOUBLE CHECK THIS
+                BLT            LESS_THAN_START
+                
+                CMP.L          #$00FFFFF0, D5               
+                BGT            GREATER_END
+                RTS 
+                
+LESS_THAN_START
+                LEA            LESS_START, A1    * ENTERED NUMBER < START
+                MOVE.B         #14, D0
+                TRAP           #15
+                BRA            TRY_AGAIN_PROMPT
+                
+GREATER_END
+                LEA            MORE_END, A1      * ENTERED NUMBER > END
+                MOVE.B         #14, D0
+                TRAP           #15
+                BRA            TRY_AGAIN_PROMPT
+
 * Here, we have starting address in D5 and ending address in D6 as hexadecimals
 
 *----------------- READ OPCODE: MAIN LOOP -------------------------------
@@ -516,8 +609,12 @@ LSL_LSR_ASL_ASR_ROL_ROR_OPCODE
                 CMP.B           #%11, D3                                       
                 BEQ             ADDR_SHIFT
                 
-                CMP.B           #%11, D3
-                BNE             REGISTER_SHIFT
+                CMP.B           #%00, D3
+                BEQ             REGISTER_SHIFT
+                CMP.B           #%01, D3
+                BEQ             REGISTER_SHIFT
+                CMP.B           #%10, D3
+                BEQ             REGISTER_SHIFT
                 
                 BRA             INVALID_OPCODE
 
@@ -599,7 +696,7 @@ ADDR_LSL_LSR_OPCODE
                 
                 JSR             PRINT_SPACE
                             
-                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
+                BRA             P_ADDR_SHIFT_EA
                 
 ADDR_ASL_ASR_OPCODE
                 LEA             AS_OPCODE_STRING, A1
@@ -610,7 +707,7 @@ ADDR_ASL_ASR_OPCODE
                 
                 JSR             PRINT_SPACE
 
-                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA
+                BRA             P_ADDR_SHIFT_EA
                 
 ADDR_ROL_ROR_OPCODE
                 LEA             RO_OPCODE_STRING, A1
@@ -621,7 +718,7 @@ ADDR_ROL_ROR_OPCODE
 
                 JSR             PRINT_SPACE
                 
-                BRA             P_LSL_LSR_ASL_ASR_ROL_ROR_EA              
+                BRA             P_ADDR_SHIFT_EA            
 
 INVALID_OPCODE  
                 LEA             INVALID_OPCODE_STRING, A1
@@ -636,7 +733,11 @@ INVALID_OPCODE
 
 
 P_INVALID_EA  
-    
+              LEA         Invalid_EA, A1
+              MOVE.B      #14, D0
+              TRAP        #15    
+              
+              BRA         INSTRUC_DONE
 P_ADD_EA  
               CMP.B       #1, D2                                          * CHECK WHICH OPMODE
               BEQ         P_ADD_DnFIRST_EA                                * Dn + < ea > -> < ea >
@@ -686,6 +787,7 @@ P_ADDQ_EA
                 MOVE.B     #14, D0
                 TRAP       #15
                 
+                CLR.L        D1
                 MOVE.W     FIRST_THREE_BITS_AFTER_OPCODE, D1
                 CMP.W      #%0000, D1                         * IF THE DATA IS %000, IT'S 8 (%1000).
                 BEQ        ADDQ_OVERFLOW
@@ -795,6 +897,7 @@ P_MOVEQ_EA
                 
                 MOVE.W      HEXBITS, D3
                 AND.W       #$00FF,D3                * GET RID OF THE FIRST 8 BITS
+                CLR.L         D1
                 MOVE.W      D3, D1
                 
                 
@@ -862,15 +965,35 @@ P_MOVEAL_EA
                 BRA         INSTRUC_DONE
                 
 P_BCC_BRA_EA
+                CLR.B       D2
+                CLR.B       D3
                 MOVE.W      HEXBITS, D1
-                AND.L       #$000000FF, D1              * GET RID OF ALL BITS EXCEPT DISPLACEMENT
+                AND.L       #$000000FF, D1              * GET RID OF ALL BITS EXCEPT DISPLACEMENT                    
                 CMP.B       #$00, D1
                 BEQ         BRA_HELPER_16BITS              
                 CMP.B       #$FF, D1
                 BEQ         BRA_HELPER_32BITS
-GOT_DISPLACE    ADD.L       CURRENT_ADDR, D1            * D1 NOW HAS THE ADDRESS TO BRANCH
+GOT_DISPLACE    CMP.B       #0, D2
+                BEQ         CHECK_NEG_8
+                CMP.B       #1, D2
+                BEQ         CHECK_NEG_16
+                CMP.B       #2, D2
+                BEQ         CHECK_NEG_32
 
-                LEA         Dollar_sign, A1                     * PRINT DOLLAR SIGN
+
+DONE            CMP.B       #1, D3
+                BNE         JUST_ADD
+                
+                SUB.L       D1, CURRENT_ADDR
+                MOVE.L      CURRENT_ADDR, D1
+                
+                
+                BRA         PRINT
+                
+
+JUST_ADD        ADD.L       CURRENT_ADDR, D1            * D1 NOW HAS THE ADDRESS TO BRANCH
+
+PRINT           LEA         Dollar_sign, A1             * PRINT DOLLAR SIGN
                 MOVE.B      #14, D0
                 TRAP        #15
                 
@@ -878,10 +1001,33 @@ GOT_DISPLACE    ADD.L       CURRENT_ADDR, D1            * D1 NOW HAS THE ADDRESS
                 BRA         INSTRUC_DONE
 BRA_HELPER_16BITS
                 MOVE.W      (A2)+, D1  
+                MOVE.B      #1, D2                      * FLAG
                 BRA         GOT_DISPLACE      
 BRA_HELPER_32BITS
                 MOVE.L      (A2)+, D1  
+                MOVE.B      #2, D2                      * FLAG
                 BRA         GOT_DISPLACE         
+CHECK_NEG_8
+                CMP.B       #$80, D1
+                BLT         DONE
+                MOVE.B      #1, D3                      * NEGATIVE FLAG
+                NOT.B       D1
+                ADD.B       #%1, D1
+                BRA         DONE
+CHECK_NEG_16
+                CMP.W       #$8000, D1
+                BLT         DONE
+                MOVE.B      #1, D3                      * NEGATIVE FLAG
+                NOT.W       D1
+                ADD.B       #%1, D1
+                BRA         DONE
+CHECK_NEG_32
+                CMP.L       #$80000000, D1
+                BLT         DONE
+                MOVE.B      #1, D3                      * NEGATIVE FLAG
+                NOT.L       D1
+                ADD.B       #%1, D1
+                BRA         DONE
                 
 P_LEA_EA  
                 MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
@@ -905,15 +1051,10 @@ P_NOT_JSR_EA
                                     
 
 P_LSL_LSR_ASL_ASR_ROL_ROR_EA
-
-                CMP.W       #%0011, SECOND_THREE_BITS_AFTER_OPCODE            * CHECKS IF IT IS REGISTER SHIFT OR MEMORY SHIFT
-                BEQ         MEMORY_SHIFT
-                CMP.W       #%0111, SECOND_THREE_BITS_AFTER_OPCODE 
-                BEQ         MEMORY_SHIFT
                                                                               * LSd Dx,Dy  (OR) LSd #<data> ,Dy
                                                                               
                 MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D3
-                LSL         #2, D3                                            * GET ACCESS TO I/R BIT
+                LSR         #2, D3                                            * GET ACCESS TO I/R BIT
                                                                               
                 CMP.B       #0, D3                                           * THIS MEANS IMMEDIATE DATA SHIFT   
                 BEQ         IMMEDIATE_SHIFT
@@ -928,14 +1069,15 @@ P_LSL_LSR_ASL_ASR_ROL_ROR_EA
                 BRA         INSTRUC_DONE                                                        
 
                                            
-IMMEDIATE_SHIFT                                                               * LSd #<data> ,Dy
+IMMEDIATE_SHIFT 
+                CLR.L         D1                                                              * LSd #<data> ,Dy
                 MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D1
                 CMP.W       #%0000, D1                                        * THIS MEANS SHIFT COUNT IS 8
                 BEQ         SHIFT_COUNT_OVERFLOW
 OVERFLOWS_FIXED LEA         Hash_sign, A1                                     * LOAD AT ADDRESS OF HASH SIGN TO A1
                 MOVE.B      #14 , D0
                 TRAP        #15
-                JSR         TRAP_PRINT
+                JSR         PRINT_IMMEDIATE
                 JSR         COMMA_PRINT
                 
                 MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4    
@@ -947,7 +1089,7 @@ SHIFT_COUNT_OVERFLOW
                 MOVE.W      #%1000, D1
                 BRA         OVERFLOWS_FIXED               
                 
-MEMORY_SHIFT                                                                  * LSd <ea>
+P_ADDR_SHIFT_EA                                                 * LSd <ea>
                 MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1
                 MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
                 JSR         EA_MODE_TABLE
@@ -1082,9 +1224,10 @@ ABS_S_PRINT                                       * It specifies a 16 bit addres
                 TRAP #15
                 
                 MOVE.W (A2)+, D1                   * MOVE THE CONTENT OF ADDRESS A2 TO D1 ( IN WORD SIZE)
+                AND.L  #$00FF, D1
 
                 JSR TRAP_PRINT                    * JUMP TO SUB ROUNTINE TO PRINT OUT THE TRAP
-                CLR D1                            * CLEAR D1 TO 0
+                CLR.L D1                            * CLEAR D1 TO 0
                 RTS
                 
 ABS_L_PRINT 
@@ -1095,7 +1238,7 @@ ABS_L_PRINT
                 MOVE.L  (A2)+, D1                    * MOVE THE CONTENT OF ADDRESS A2 TO D1 ( IN LONG SIZE)
 
                 JSR TRAP_PRINT                    * JUMP TO SUB ROUNTINE TO PRINT OUT THE TRAP
-                CLR D1                            * CLEAR D1 TO 0
+                CLR.L D1                            * CLEAR D1 TO 0
                 RTS                
                 
 IMMEDIATE_PRINT                                      
@@ -1110,14 +1253,14 @@ IMMEDIATE_PRINT
               BRA     IMD_WORD                    * WORD SIZE 
                 
 IMD_LONG         
+              CLR.L      D1
               MOVE.L  (A2)+,D1                    
               JSR      PRINT_IMMEDIATE   
-              CLR.L    D1
               RTS                
 IMD_WORD
+              CLR.L      D1
               MOVE.W  (A2)+,D1                
               JSR     PRINT_IMMEDIATE        
-              CLR.L   D1
               RTS                
                 
 PRINT_IMMEDIATE                                   * $# 
@@ -1128,18 +1271,6 @@ PRINT_IMMEDIATE                                   * $#
               JSR TRAP_PRINT
               RTS                
                 
-IMD_DATA_PRINT                                      
-              LEA Hash_sign, A1                   * PRINT HASH SIGN 
-              MOVE.B #14, D0
-              TRAP #15
-
-                
-              LEA Dollar_sign, A1                 * PRINT DOLLAR SIGN
-              MOVE.B #14, D0
-              TRAP #15
-              
-              JSR TRAP_PRINT                      * PRINT THE NECCESSARY TRAP
-              RTS
 
 INVALID_EA_PRINT    
               LEA Invalid_EA, A1                  * LOAD A1 TO Invalid ea message
@@ -1166,6 +1297,7 @@ NEXT_INSTRUC    BRA             READ_OPCODE                   * IF DONE PRINTING
 EXIT_MAIN_LOOP  LEA             PROMPT3, A1                  * ASK USER IF THEY WANT TO KEEP USING THE PROGRAM
                 MOVE.B          #14, D0                      * DISPLAY GOODBYE
                 TRAP            #15  
+                
                 LEA             EXTRA3, A1                   * TO READ IN USER INPUT
                 MOVE.B          #2, D0                       * STORE USER INPUT IN A1
                 TRAP            #15    
@@ -1173,11 +1305,110 @@ EXIT_MAIN_LOOP  LEA             PROMPT3, A1                  * ASK USER IF THEY 
                 CMP.B           #$59, D0                     * CHECK IF USER TYPED IN "Y"
                 BEQ             USER_INPUT
                 
-                LEA             GOODBYE, A1                  * LOAD GOOD BYE MESSAGE INTO A1
+RESTART 
+                MOVE.W          #$FF00, D1                   ; CLEAR SCREEN IN TASK 11
+                MOVE.B          #11, D0
+                TRAP            #15
+                
+                CLR.L   D0                  ; Clear all data registers
+                CLR.L   D1
+                CLR.L   D2
+                CLR.L   D3
+                CLR.L   D4
+                CLR.L   D5
+                CLR.L   D6
+                CLR.L   D7
+                
+                MOVE.L  #$0, A1             ; Reset all address registers
+                MOVE.L  #$0, A2
+                MOVE.L  #$0, A3
+                MOVE.L  #$0, A4
+                MOVE.L  #$0, A5
+                MOVE.L  #$0, A6
+                BRA     Start
+                
+                
+                
+                
+ENDING          LEA             GOODBYE, A1                  * LOAD GOOD BYE MESSAGE INTO A1
                 MOVE.B          #14, D0                      * DISPLAY GOODBYE
                 TRAP            #15                
+                              
                 
                 SIMHALT
+                
+*-----------------CHECKING VALID INPUT -----------------------------------
+INPUT_VALID_SIZE    
+               CMP.L           #0, D1                        * IS IS AN EMPTY INPUT?
+               BEQ             EMPTY_INPUT                   * JSR TO EMPTY INPUT SUBROUTINE
+               
+               CMP.L           #8, D1                        * IS IS 8 DIGITS?
+               BGT             MORE_THAN_EIGHT               * INVALID
+               BLT             LESS_THAN_EIGHT               * INVALID
+
+               RTS
+
+
+EMPTY_INPUT
+               LEA             EMPTY, A1
+               MOVE.B          #14, D0
+               TRAP            #15          
+               BRA             TRY_AGAIN_PROMPT             
+
+MORE_THAN_EIGHT
+               LEA             LONGER, A1
+               MOVE.B          #14, D0
+               TRAP            #15
+               BRA             TRY_AGAIN_PROMPT
+               
+LESS_THAN_EIGHT
+               LEA             LESS, A1
+               MOVE.B          #14, D0
+               TRAP            #15
+               BRA             TRY_AGAIN_PROMPT 
+       
+TRY_AGAIN_PROMPT
+               LEA             TRYAGAIN, A1
+               MOVE.B          #14, D0
+               TRAP            #15
+               
+               MOVE.B          #5, D0                       ; READ A SINGLE CHAR FROM KEYBOARD
+               TRAP            #15
+               
+               LEA     SPACE, A1     
+               MOVE.B  #14, D0         
+               TRAP    #15
+        
+               CMPI.B  #$59, D1                 ;Check 'Y' in ascii
+               BEQ     RESTART
+
+               CMPI.B  #$79, D1                 ;Check 'y' in ascii
+               BEQ     RESTART
+               
+               CMPI.B  #$4E, D1                 ;Check 'N' in ascii
+               BEQ     ENDING     
+      
+               CMPI.B  #$6E, D1                 ;Check 'n' in ascii
+               BEQ     ENDING
+               BNE     Invalid_Y_N              ;If none of these are inputted, try again      
+
+Invalid_Y_N
+               LEA      Y_or_N, A1
+               MOVE.B   #14, D0
+               TRAP     #15
+               BRA      TRY_AGAIN_PROMPT
+                            
+
+PRINT_SPACE     LEA             STR_SPACE, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                RTS
+
+PRINT_NEWLINE   LEA             STR_SPACE, A1
+                MOVE.B          #13, D0
+                TRAP            #15
+                RTS
+
                 
 SPLIT_AFTER_OPCODE
                 MOVE.W          HEXBITS, D3
@@ -1406,16 +1637,6 @@ PRINT_LOOP      CMPI.B	        #$30, D3
 PRINT_NUM	    MOVE	        #14, D0
 			    TRAP	        #15
 			    RTS
-
-PRINT_SPACE     LEA             STR_SPACE, A1
-                MOVE.B          #14, D0
-                TRAP            #15
-                RTS
-
-PRINT_NEWLINE   LEA             STR_SPACE, A1
-                MOVE.B          #13, D0
-                TRAP            #15
-                RTS
                 
 ZERO		    LEA		        STRING0, A1
 			    BRA		        PRINT_NUM
@@ -1449,12 +1670,33 @@ E		        LEA		        STRINGE, A1
 			    BRA		        PRINT_NUM
 F   		    LEA		        STRINGF, A1
 			    BRA		        PRINT_NUM
+			    
+RULE            DC.B 'Wellcome! This is a dissambler program from group 4', CR, LF
+                DC.B 'This is some information to enter a valid input:', CR, LF
+                DC.B 'Address entered need to be in hexedimal and in a Longword', CR, LF
+                DC.B 'Starting memory addrress must be greater or less than $0x1000', CR, LF
+                DC.B 'Ending memory address must be in range [0x1000 - 0xFFFFF0]', CR, LF, 0
+                
+                
+			    
+PROMPT1	        DC.B 'Please enter the starting memory address in hex: ',0
+EXTRA1          DC.B '         ', 0 
 
+EMPTY           DC.B 'Empty input. Program restart...', CR, LF, 0
+LONGER          DC.B 'The entered input was longer than 8 digits', CR, LF, 0
+LESS            DC.B 'The enterd input was less than 8 digits', CR, LF, 0
+LESS_START      DC.B 'You have entered the address that is less than 00001000. Restarting...', CR,LF, 0
+MORE_END        DC.B 'you have entered the address that is greater than 00FFFFF0. Restarting..'
+TRYAGAIN        DC.B 'Press "Y" to try again. Press "N" is no', CR, LF, 0
+SPACE           DC.B ' ', CR, LF, 0
+y_OR_N          DC.B 'Invalid input. Enter "Y" or "N" ', CR, LF, 0
+CANT_CONVERT    DC.B 'Character input was not in range [A-F]. Restarting...', CR, LF, 0
+ODD_NUMBER      DC.B 'The address input was odd which is invalid. Restarting...', CR, LF,0
 
-PROMPT1	        DC.B 'Please enter the starting memory address in hexadecimal (Longword) form: ',0
-EXTRA1          DC.B '         ', 0
-PROMPT2	        DC.B 'Please enter the ending memory address in hexadecimal (Longword) form: ',0
+PROMPT2	        DC.B 'Please enter the ending memory address in hex: ',0
 EXTRA2          DC.B '         ', 0
+
+
 PROMPT3	        DC.B 'Do you wish to read another program? Type ONLY "Y" for Yes and "N" for No: ',0
 EXTRA3          DC.B '  ', 0
 GOODBYE	        DC.B 'Thank you for using our disassembler! Good Bye.',0
@@ -1531,6 +1773,13 @@ Invalid_EA      DC.B    '$WXYZ', 0
                 END    START
 
 
+
+
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
 
 
 
