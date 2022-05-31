@@ -72,8 +72,42 @@ USER_INPUT
                 CMP.L          #$FF00, D1                    
                 BEQ            USER_INPUT
 
+                CLR.L          D2                             * COUNTER TO READ 30 LOC AT A TIME
+              
+PAGE_SCAN_LOOP  
+                * D5 IS THE 
+                CMP.L          D5, D6                         * compare starting addr to ending addr
+                BLT            EXIT_LOOP
+                
+                CMP.B          #$14, D7                        * $14 should be 20 In hex
+                BEQ            DISASSAMBLY_20_LOC             
+                
+                MOVE.L         #CURR_ADDRESS, A5
+                MOVE.L         D5,  D3
+                ;JSR            PRINT_MEM_ADDR                * PRINT CURRENT ADDRESS
+                MOVE.B         #0, (A5)+
+                JSR            DISPLAY
+                MOVEA.L        D5, A2
+                MOVE.W         (A2), D3
+                
                 
                 BRA            MAIN
+                
+INCRE_LINE      LEA STR_SPACE ,A1
+                MOVE.B  #14,D0
+                TRAP    #15
+
+                ADD.L   #$2, D5         ;Increment this BY 2
+        
+                ;MOVE.L  #$2, StartAddr
+                ADD.B   #1, D7          ;Increment the amount of lines displayed by 1
+
+                BRA     PAGE_SCAN_LOOP
+                     
+DISASSAMBLY_20_LOC 
+                CLR.L   D7              
+                BRA     NEXT_PROMPT      
+                
                 
 **------------ CONVERT THE ADDRESS STRINGS TO HEXADECIMAL VALUES -----------------
                 
@@ -168,8 +202,51 @@ GREATER_END
                 TRAP           #15
                 BRA            TRY_AGAIN_PROMPT
 
+*-----------------------20 lines of code at a time ------------------------------------
+NEXT_PROMPT     
+                LEA            PROMPT3, A1
+                MOVE.B         #14, D0
+                TRAP           #15
+                
+                MOVE.B         #5, D0             * READ THE SINGLE CHARACTER FROM KB
+                TRAP           #15
+                
+                LEA            STR_SPACE, A1
+                MOVE.B         #14, D0
+                TRAP           #15
+                
+                CMP.B          #$4E, D1           * "N" IN ASCII
+                BEQ            ENDING
+                
+                CMP.B          #$6E, D1           * "n" in ascii
+                BEQ            ENDING      
+                
+                CMP.B          #$D, D1            * PRESS ENTER
+                BEQ            NEXT_PAGE           
+                
+                LEA            ENTER_OR_N, A1     ; NOTICE USER FOR ERROR INPUT
+                MOVE.B         #14, D1
+                TRAP           #15
+                BRA            NEXT_PROMPT        ; LOOP BACK TO ASK
+NEXT_PAGE       
+                MOVE.W        #$FF00, D1          * TO CLEAR THE SCREEN
+                MOVE.B        #11, D0
+                TRAP          #15
+                BRA           PAGE_SCAN_LOOP
+                
+*----------------- PRINT OUT THE CURRENT ADDRESS -------------------------------                
+DISPLAY
+                LEA         CURR_ADDRESS, A1    * DISPLAY CURRENT ADDRESS
+                MOVE.B      #14, D0
+                TRAP        #15
+                RTS
+                
+CLR_SCREEN
+                MOVE.W      #$FF00, D1              * TO CLR SCREEN FOR TASK 11
+                MOVE.B      #11, D0
+                TRAP        #15
+                RTS         
 * Here, we have starting address in D5 and ending address in D6 as hexadecimals
-
 *----------------- READ OPCODE: MAIN LOOP -------------------------------
 
 MAIN            MOVEA.L        D5, A2                        * START READING FROM D5(STARTING ADDRESS)            
@@ -1289,8 +1366,8 @@ TRAP_PRINT
 
 INSTRUC_DONE    JSR             PRINT_NEWLINE
 
-NEXT_INSTRUC    BRA             READ_OPCODE                   * IF DONE PRINTING INSTRUCTION AND THERE ARE MORE, READ ANOTHER 
-
+;NEXT_INSTRUC    BRA             READ_OPCODE                   * IF DONE PRINTING INSTRUCTION AND THERE ARE MORE, READ ANOTHER 
+NEXT_INSTRUC    BRA             INCRE_LINE                     * IF DONE PRINTING INSTRUCTION AND THERE ARE MORE, READ ANOTHER 
 *-------------------------- PROGRAM END ------------------------------------
 
 
@@ -1304,6 +1381,7 @@ EXIT_MAIN_LOOP  LEA             PROMPT3, A1                  * ASK USER IF THEY 
                 MOVE.B          (A1)+, D0           
                 CMP.B           #$59, D0                     * CHECK IF USER TYPED IN "Y"
                 BEQ             USER_INPUT
+                BRA             ENDING
                 
 RESTART 
                 MOVE.W          #$FF00, D1                   ; CLEAR SCREEN IN TASK 11
@@ -1328,9 +1406,43 @@ RESTART
                 BRA     Start
                 
                 
+EXIT_LOOP       
+                BRA             FINISH_PROMPT
+
+FINISH_PROMPT
+                LEA     FINISH, A1  ;Finished Diassembling, ask to restart or stop
+                MOVE.B  #14, D0    
+                TRAP    #15
+        
+                MOVE.B  #5, D0      ;Read in the character from the keyboard
+                TRAP    #15      
+
+                LEA     STR_SPACE, A1     
+                MOVE.B  #14, D0         
+                TRAP    #15   
+        
+                CMPI.B  #$52, D1    ;the ASCII string is 'R'
+                BEQ     RESTART
+        
+                CMPI.B  #$72, D1    ;the ASCII string is 'r'
+                BEQ     Restart
+        
+                CMPI.B  #$53, D1    ;ASCII string is 'S'
+                BEQ     ENDING
+
+        
+                CMPI.B  #$73, D1    ; ASCII string is 's'
+                BEQ     ENDING
+        
+                LEA     R_OR_S, A1     ;Invalid input. Ask for R or S
+                MOVE.B  #14, D0     
+                TRAP    #15
+
+                BRA     FINISH_PROMPT       ; INVALID INPUT -> LOOP BACK                   
                 
-                
-ENDING          LEA             GOODBYE, A1                  * LOAD GOOD BYE MESSAGE INTO A1
+ENDING          
+                JSR             PRINT_NEWLINE
+                LEA             GOODBYE, A1                  * LOAD GOOD BYE MESSAGE INTO A1
                 MOVE.B          #14, D0                      * DISPLAY GOODBYE
                 TRAP            #15                
                               
@@ -1681,24 +1793,23 @@ RULE            DC.B 'Wellcome! This is a dissambler program from group 4', CR, 
 			    
 PROMPT1	        DC.B 'Please enter the starting memory address in hex: ',0
 EXTRA1          DC.B '         ', 0 
-
 EMPTY           DC.B 'Empty input. Program restart...', CR, LF, 0
 LONGER          DC.B 'The entered input was longer than 8 digits', CR, LF, 0
 LESS            DC.B 'The enterd input was less than 8 digits', CR, LF, 0
 LESS_START      DC.B 'You have entered the address that is less than 00001000. Restarting...', CR,LF, 0
 MORE_END        DC.B 'you have entered the address that is greater than 00FFFFF0. Restarting..'
-TRYAGAIN        DC.B 'Press "Y" to try again. Press "N" is no', CR, LF, 0
+TRYAGAIN        DC.B 'Press "Y" to try again. Press "N" for no', CR, LF, 0
 SPACE           DC.B ' ', CR, LF, 0
 y_OR_N          DC.B 'Invalid input. Enter "Y" or "N" ', CR, LF, 0
+R_OR_S          DC.B 'Invalid input. Enter "R" or "S" ' , CR, LF, 0
 CANT_CONVERT    DC.B 'Character input was not in range [A-F]. Restarting...', CR, LF, 0
 ODD_NUMBER      DC.B 'The address input was odd which is invalid. Restarting...', CR, LF,0
-
 PROMPT2	        DC.B 'Please enter the ending memory address in hex: ',0
 EXTRA2          DC.B '         ', 0
-
-
-PROMPT3	        DC.B 'Do you wish to read another program? Type ONLY "Y" for Yes and "N" for No: ',0
+PROMPT3	        DC.B 'Do you wish to dissamble another 20 loc? Press Enter for Yes and "N" for No: ', CR, LF, 0
 EXTRA3          DC.B '  ', 0
+ENTER_OR_N      DC.B 'Invalid input. Press "Enter" to continue reading, "N" for exitting the program.',CR, LF, 0
+FINISH          DC.B 'We have finish the disambler. To Restart press "R", to stop press "S" ',CR ,LF, 0 
 GOODBYE	        DC.B 'Thank you for using our disassembler! Good Bye.',0
 
 STR_SPACE       DC.B ' ', 0
@@ -1767,8 +1878,9 @@ Close_pars      DC.B    ')', 0  * CLOSE PARENTHIS
 Hash_sign       DC.B    '#', 0  * HASH SIGN
 Dollar_sign     DC.B    '$', 0  * DOLLAR SIGN
 Comma           DC.B    ',', 0  * COMMA
-*DATA_SIZE       DC.B    %0000
 Invalid_EA      DC.B    '$WXYZ', 0
+
+CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 
                 END    START
 
@@ -1780,6 +1892,7 @@ Invalid_EA      DC.B    '$WXYZ', 0
 *~Font size~10~
 *~Tab type~1~
 *~Tab size~4~
+
 
 
 
