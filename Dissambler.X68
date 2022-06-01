@@ -810,9 +810,8 @@ INVALID_OPCODE
 
 
 P_INVALID_EA  
-              LEA         Invalid_EA, A1
-              MOVE.B      #14, D0
-              TRAP        #15    
+              MOVE.W            HEXBITS, D3
+              JSR               HEX_TO_STRING
               
               BRA         INSTRUC_DONE
 P_ADD_EA  
@@ -1347,13 +1346,18 @@ PRINT_IMMEDIATE                                   * $#
               
               JSR TRAP_PRINT
               RTS                
-                
 
 INVALID_EA_PRINT    
-              LEA Invalid_EA, A1                  * LOAD A1 TO Invalid ea message
-              MOVE.B #14, D0
-              TRAP #15                            * HARDWARE INTERUPT
-              RTS                        
+                LEA             INVALID_OPCODE_STRING, A1
+                MOVE.B          #14, D0
+                TRAP            #15
+                
+                JSR             PRINT_SPACE
+
+                MOVE.W          HEXBITS, D3
+                JSR             HEX_TO_STRING
+
+                RTS                       
                 
 TRAP_PRINT
               MOVEQ #15, D0                      
@@ -1788,9 +1792,7 @@ RULE            DC.B 'Wellcome! This is a dissambler program from group 4', CR, 
                 DC.B 'Address entered need to be in hexedimal and in a Longword', CR, LF
                 DC.B 'Starting memory addrress must be greater or less than $0x1000', CR, LF
                 DC.B 'Ending memory address must be in range [0x1000 - 0xFFFFF0]', CR, LF, 0
-                
-                
-			    
+                                			    
 PROMPT1	        DC.B 'Please enter the starting memory address in hex: ',0
 EXTRA1          DC.B '         ', 0 
 EMPTY           DC.B 'Empty input. Program restart...', CR, LF, 0
@@ -1806,7 +1808,7 @@ CANT_CONVERT    DC.B 'Character input was not in range [A-F]. Restarting...', CR
 ODD_NUMBER      DC.B 'The address input was odd which is invalid. Restarting...', CR, LF,0
 PROMPT2	        DC.B 'Please enter the ending memory address in hex: ',0
 EXTRA2          DC.B '         ', 0
-PROMPT3	        DC.B 'Do you wish to dissamble another 20 loc? Press Enter for Yes and "N" for No: ', CR, LF, 0
+PROMPT3	        DC.B 'Do you wish to dissamble another 20 addresses? Press "Enter" for Yes and "N" for No: ', CR, LF, 0
 EXTRA3          DC.B '  ', 0
 ENTER_OR_N      DC.B 'Invalid input. Press "Enter" to continue reading, "N" for exitting the program.',CR, LF, 0
 FINISH          DC.B 'We have finish the disambler. To Restart press "R", to stop press "S" ',CR ,LF, 0 
@@ -1878,7 +1880,7 @@ Close_pars      DC.B    ')', 0  * CLOSE PARENTHIS
 Hash_sign       DC.B    '#', 0  * HASH SIGN
 Dollar_sign     DC.B    '$', 0  * DOLLAR SIGN
 Comma           DC.B    ',', 0  * COMMA
-Invalid_EA      DC.B    '$WXYZ', 0
+;Invalid_EA      DC.B    '$WXYZ', 0
 
 CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 
@@ -1892,6 +1894,7 @@ CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 *~Font size~10~
 *~Tab type~1~
 *~Tab size~4~
+
 
 
 
