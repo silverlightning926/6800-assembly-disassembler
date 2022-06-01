@@ -19,7 +19,6 @@
 
 8. The program should be able to realize when it has an illegal instruction ( i.e, data ), and be able to deal with it until it can find instructions again to decode. Instructions that cannot be decoded, either because they do not disassemble as op codes or because you aren't able to decode them should be displayed as:
   `1000    DATA    $WXYZ`
-
 where $WXYZ is the hexadecimal number that couldn't be decoded. Your program should not crash because it can't decode an instruction. Remember, it is perfectly legal to have data and instructions interspersed, so it is very possible that you will hit data, and not an instruction.
 
 9. Address displacements or offsets should be properly displayed as the address of the branch and display that value. It's the absolute address value, not the displacement value. For example:
