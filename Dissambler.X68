@@ -1352,20 +1352,10 @@ PRINT_IMMEDIATE                                   * $#
               RTS                
 
 INVALID_EA_PRINT    
-                LEA             INVALID_OPCODE_STRING, A1
-                MOVE.B          #14, D0
-                TRAP            #15
-                
-                JSR             PRINT_SPACE
-                
-                LEA Dollar_sign, A1
-                MOVE.B #14, D0
-                TRAP #15
-
-                MOVE.W          HEXBITS, D3
-                JSR             HEX_TO_STRING
-
-                RTS                       
+              LEA Invalid_EA, A1                  * LOAD A1 TO Invalid ea message
+              MOVE.B #14, D0
+              TRAP #15                            * HARDWARE INTERUPT
+              RTS                           
                 
 TRAP_PRINT
               MOVEQ #15, D0                      
@@ -1601,8 +1591,6 @@ NO_CHANGE       CMP.B           #%000, D3
                 BEQ             PRINT_LONG
                 
                 RTS
-
-                
                 
 PRINT_ADDA_SIZE_CODE
                 MOVE.W          SECOND_THREE_BITS_AFTER_OPCODE, D3
@@ -1888,11 +1876,12 @@ Close_pars      DC.B    ')', 0  * CLOSE PARENTHIS
 Hash_sign       DC.B    '#', 0  * HASH SIGN
 Dollar_sign     DC.B    '$', 0  * DOLLAR SIGN
 Comma           DC.B    ',', 0  * COMMA
-;Invalid_EA      DC.B    '$WXYZ', 0
+Invalid_EA      DC.B    '$WXYZ', 0
 
 CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 
                 END    START
+
 
 *~Font name~Courier New~
 *~Font size~10~
