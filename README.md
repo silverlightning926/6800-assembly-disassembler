@@ -1,6 +1,6 @@
 # 68K-Disassembler
 ### CSS 422 Final Project<br>
-#### By Group 4 - Arkar Kyaw Swar, Siddharth Rao, Eric Dang
+#### By Group 4 - Arkar Kyaw Swar, Siddharth Rao, Phu Thinh Dang
 ---
 ### Specification
 1. Write an inverse assembler (disassembler) that will convert a memory image of instructions and data back to 68000 assembly language and output the disassembled code to the display. You will not be required to disassemble all of the instructions and addressing modes. The list of instructions and addressing modes is given at Required Opcodes page. Note that I'm not going to fill the memory with garbage!
