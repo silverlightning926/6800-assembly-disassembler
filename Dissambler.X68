@@ -809,25 +809,29 @@ INVALID_OPCODE
 *------------------------------- EA ---------------------------------------- 
 
 
-P_INVALID_EA  
-              MOVE.W            HEXBITS, D3
-              JSR               HEX_TO_STRING
+P_INVALID_EA
+                LEA Dollar_sign, A1
+                MOVE.B #14, D0
+                TRAP #15
+  
+                MOVE.W            HEXBITS, D3
+                JSR               HEX_TO_STRING
               
-              BRA         INSTRUC_DONE
+                BRA         INSTRUC_DONE
 P_ADD_EA  
-              CMP.B       #1, D2                                          * CHECK WHICH OPMODE
-              BEQ         P_ADD_DnFIRST_EA                                * Dn + < ea > -> < ea >
+                CMP.B       #1, D2                                          * CHECK WHICH OPMODE
+                BEQ         P_ADD_DnFIRST_EA                                * Dn + < ea > -> < ea >
               
-              MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1               * EA MODE , <EA> + Dn -> Dn
-              MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
-              MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE       
-              JSR         EA_MODE_TABLE
-              JSR         COMMA_PRINT
+                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1               * EA MODE , <EA> + Dn -> Dn
+                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+                MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE       
+                JSR         EA_MODE_TABLE
+                JSR         COMMA_PRINT
               
-              MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4   
-              JSR         Dn_Mode_Print
+                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4   
+                JSR         Dn_Mode_Print
               
-              BRA         INSTRUC_DONE
+                BRA         INSTRUC_DONE
               
 P_ADD_DnFIRST_EA                        * Dn + < ea > -> < ea >
 
@@ -1353,6 +1357,10 @@ INVALID_EA_PRINT
                 TRAP            #15
                 
                 JSR             PRINT_SPACE
+                
+                LEA Dollar_sign, A1
+                MOVE.B #14, D0
+                TRAP #15
 
                 MOVE.W          HEXBITS, D3
                 JSR             HEX_TO_STRING
