@@ -1894,19 +1894,6 @@ CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 
                 END    START
 
-
-
-
-
-*~Font name~Courier New~
-*~Font size~10~
-*~Tab type~1~
-*~Tab size~4~
-
-
-
-
-
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
