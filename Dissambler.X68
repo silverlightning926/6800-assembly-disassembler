@@ -1790,21 +1790,21 @@ E		        LEA		        STRINGE, A1
 F   		    LEA		        STRINGF, A1
 			    BRA		        PRINT_NUM
 			    
-RULE            DC.B 'Wellcome! This is a dissambler program from group 4', CR, LF
+RULE            DC.B 'Wellcome! This is a dissasembler program from group 4', CR, LF
                 DC.B 'This is some information to enter a valid input:', CR, LF
-                DC.B 'Address entered need to be in hexedimal and in a Longword', CR, LF
-                DC.B 'Starting memory addrress must be greater or less than $0x1000', CR, LF
+                DC.B 'Address entered need to be in hexadecimal and in a longword', CR, LF
+                DC.B 'Starting memory address must be greater or less than $0x1000', CR, LF
                 DC.B 'Ending memory address must be in range [0x1000 - 0xFFFFF0]', CR, LF, 0
                 
-PROMPT1	        DC.B 'Please enter the starting memory address in hex: ',0
+PROMPT1	        DC.B 'Please enter an even starting memory address in hex: ',0
 EXTRA1          DC.B '         ', 0 
-EMPTY           DC.B 'Empty input. Program restart...', CR, LF, 0
+EMPTY           DC.B 'Empty input. Program restarting...', CR, LF, 0
 LONGER          DC.B 'The entered input was longer than 8 digits', CR, LF, 0
-LESS            DC.B 'The enterd input was less than 8 digits', CR, LF, 0
+LESS            DC.B 'The entered input was less than 8 digits', CR, LF, 0
 LESS_START      DC.B 'You have entered the address that is less than 00001000. Restarting...', CR,LF, 0
-MORE_END        DC.B 'you have entered the address that is greater than 00FFFFF0. Restarting..'
+MORE_END        DC.B 'You have entered the address that is greater than 00FFFFF0. Restarting..'
 TRYAGAIN        DC.B 'Press "Y" to try again. Press "N" for no', CR, LF, 0
-SAGEA           DC.B 'Input starting address is greater than input ending address', CR, LF, 0
+SAGEA           DC.B 'Inputed starting address is greater than the inputed ending address', CR, LF, 0
 SPACE           DC.B ' ', CR, LF, 0
 y_OR_N          DC.B 'Invalid input. Enter "Y" or "N" ', CR, LF, 0
 R_OR_S          DC.B 'Invalid input. Enter "R" or "S" ' , CR, LF, 0
@@ -1812,11 +1812,11 @@ CANT_CONVERT    DC.B 'Character input was not in range [A-F]. Restarting...', CR
 ODD_NUMBER      DC.B 'The address input was odd which is invalid. Restarting...', CR, LF,0
 PROMPT2	        DC.B 'Please enter the ending memory address in hex: ',0
 EXTRA2          DC.B '         ', 0
-PROMPT3	        DC.B 'Do you wish to dissamble another 20 loc? Press Enter for Yes and "N" for No: ', CR, LF, 0
+PROMPT3	        DC.B 'Do you wish to dissasemble another 20 loc? Press Enter for Yes and "N" for No: ', CR, LF, 0
 EXTRA3          DC.B '  ', 0
 ENTER_OR_N      DC.B 'Invalid input. Press "Enter" to continue reading, "N" for exitting the program.',CR, LF, 0
-FINISH          DC.B 'We have finish the disambler. To Restart press "R", to stop press "S" ',CR ,LF, 0 
-GOODBYE	        DC.B 'Thank you for using our disassembler! Good Bye.',0
+FINISH          DC.B 'The dissasembler has finished. To Restart press "R", to stop press "S" ',CR ,LF, 0 
+GOODBYE	        DC.B 'Thank you for using our dissasembler! Good Bye.',0
 
 STR_SPACE       DC.B ' ', 0
 STRING_DOT      DC.B '.', 0
@@ -1898,6 +1898,7 @@ CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 *~Font size~10~
 *~Tab type~1~
 *~Tab size~4~
+
 
 
 
