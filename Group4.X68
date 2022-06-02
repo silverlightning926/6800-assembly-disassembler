@@ -815,6 +815,9 @@ P_INVALID_EA
                 LEA Dollar_sign, A1
                 MOVE.B #14, D0
                 TRAP #15
+                
+                MOVE.W          HEXBITS, D3
+                JSR             HEX_TO_STRING
   
                 BRA         INSTRUC_DONE
 P_ADD_EA  
@@ -1886,6 +1889,7 @@ Invalid_EA      DC.B    '$WXYZ', 0
 CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 
                 END    START
+
 
 
 *~Font name~Courier New~
