@@ -73,9 +73,12 @@ USER_INPUT
                 BEQ            USER_INPUT
 
                 CLR.L          D2                             * COUNTER TO READ 30 LOC AT A TIME
+                
+SAGEA_CHECK     CMP.L          D6, D5                         * IF THE ENDING ADDR > STARTING ADDR AT THE 1ST PLACE
+                BGT            NOTIFY           
               
 PAGE_SCAN_LOOP  
-                * D5 IS THE 
+                * D5 IS THE STARTING ADDRESS
                 CMP.L          D5, D6                         * compare starting addr to ending addr
                 BLT            EXIT_LOOP
                 
@@ -1407,7 +1410,11 @@ RESTART
                 MOVE.L  #$0, A6
                 BRA     Start
                 
-                
+NOTIFY
+                LEA     SAGEA, A1   ;notify that statting address, or current address is greater than ending address
+                MOVE.B  #14, D0
+                TRAP #15 
+ 
 EXIT_LOOP       
                 BRA             FINISH_PROMPT
 
@@ -1788,7 +1795,7 @@ RULE            DC.B 'Wellcome! This is a dissambler program from group 4', CR, 
                 DC.B 'Address entered need to be in hexedimal and in a Longword', CR, LF
                 DC.B 'Starting memory addrress must be greater or less than $0x1000', CR, LF
                 DC.B 'Ending memory address must be in range [0x1000 - 0xFFFFF0]', CR, LF, 0
-                                			    
+                
 PROMPT1	        DC.B 'Please enter the starting memory address in hex: ',0
 EXTRA1          DC.B '         ', 0 
 EMPTY           DC.B 'Empty input. Program restart...', CR, LF, 0
@@ -1797,6 +1804,7 @@ LESS            DC.B 'The enterd input was less than 8 digits', CR, LF, 0
 LESS_START      DC.B 'You have entered the address that is less than 00001000. Restarting...', CR,LF, 0
 MORE_END        DC.B 'you have entered the address that is greater than 00FFFFF0. Restarting..'
 TRYAGAIN        DC.B 'Press "Y" to try again. Press "N" for no', CR, LF, 0
+SAGEA           DC.B 'Input starting address is greater than input ending address', CR, LF, 0
 SPACE           DC.B ' ', CR, LF, 0
 y_OR_N          DC.B 'Invalid input. Enter "Y" or "N" ', CR, LF, 0
 R_OR_S          DC.B 'Invalid input. Enter "R" or "S" ' , CR, LF, 0
@@ -1804,7 +1812,7 @@ CANT_CONVERT    DC.B 'Character input was not in range [A-F]. Restarting...', CR
 ODD_NUMBER      DC.B 'The address input was odd which is invalid. Restarting...', CR, LF,0
 PROMPT2	        DC.B 'Please enter the ending memory address in hex: ',0
 EXTRA2          DC.B '         ', 0
-PROMPT3	        DC.B 'Do you wish to dissamble another 20 addresses? Press "Enter" for Yes and "N" for No: ', CR, LF, 0
+PROMPT3	        DC.B 'Do you wish to dissamble another 20 loc? Press Enter for Yes and "N" for No: ', CR, LF, 0
 EXTRA3          DC.B '  ', 0
 ENTER_OR_N      DC.B 'Invalid input. Press "Enter" to continue reading, "N" for exitting the program.',CR, LF, 0
 FINISH          DC.B 'We have finish the disambler. To Restart press "R", to stop press "S" ',CR ,LF, 0 
@@ -1881,6 +1889,19 @@ Invalid_EA      DC.B    '$WXYZ', 0
 CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 
                 END    START
+
+
+
+
+
+*~Font name~Courier New~
+*~Font size~10~
+*~Tab type~1~
+*~Tab size~4~
+
+
+
+
 
 
 *~Font name~Courier New~
