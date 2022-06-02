@@ -19,7 +19,7 @@ LF                              EQU $0A
 START:         ORG $1000                                     ; FIRST INSTRUCTION OF THE PROG
                LEA STACK, A7                                 ; SET UP THE SP
                
-*------------ INTRO AND SOME RULES FOR THE DISSAMBLER -----------------               
+*------------ INTRO AND SOME RULES FOR THE DISASSEMBLER -----------------               
               LEA RULE, A1
               MOVE.B #14, D0
               TRAP #15
@@ -1787,7 +1787,7 @@ E		        LEA		        STRINGE, A1
 F   		    LEA		        STRINGF, A1
 			    BRA		        PRINT_NUM
 			    
-RULE            DC.B 'Welcome! This is a dissambler program from group 4', CR, LF
+RULE            DC.B 'Welcome! This is a disassembler program from group 4', CR, LF
                 DC.B 'This is some information to enter a valid input:', CR, LF
                 DC.B 'Address entered need to be in hexadecimal and in a longword', CR, LF
                 DC.B 'Starting memory address must be greater or less than $0x1000', CR, LF
@@ -1809,11 +1809,11 @@ CANT_CONVERT    DC.B 'Character input was not in range [A-F]. Restarting...', CR
 ODD_NUMBER      DC.B 'The address input was odd which is invalid. Restarting...', CR, LF,0
 PROMPT2	        DC.B 'Please enter the ending memory address in hex: ',0
 EXTRA2          DC.B '         ', 0
-PROMPT3	        DC.B 'Do you wish to dissasemble another 20 loc? Press Enter for Yes and "N" for No: ', CR, LF, 0
+PROMPT3	        DC.B 'Do you wish to disassemble another 20 loc? Press Enter for Yes and "N" for No: ', CR, LF, 0
 EXTRA3          DC.B '  ', 0
 ENTER_OR_N      DC.B 'Invalid input. Press "Enter" to continue reading, "N" for exitting the program.',CR, LF, 0
-FINISH          DC.B 'The dissasembler has finished. To Restart press "R", to stop press "S" ',CR ,LF, 0 
-GOODBYE	        DC.B 'Thank you for using our dissasembler! Good Bye.',0
+FINISH          DC.B 'The disassembler has finished. To Restart press "R", to stop press "S" ',CR ,LF, 0 
+GOODBYE	        DC.B 'Thank you for using our disassembler! Good Bye.',0
 
 STR_SPACE       DC.B ' ', 0
 STRING_DOT      DC.B '.', 0
@@ -1886,6 +1886,7 @@ Invalid_EA      DC.B    '$WXYZ', 0
 CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 
                 END    START
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
