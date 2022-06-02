@@ -5,13 +5,13 @@
 * Description: 68K Disassembler
 *-----------------------------------------------------------
 STACK                           EQU $A000
-HEXBITS                         EQU $100
-FIRST_THREE_BITS_AFTER_OPCODE   EQU $200
-SECOND_THREE_BITS_AFTER_OPCODE  EQU $210
-THIRD_THREE_BITS_AFTER_OPCODE   EQU $220
-FOURTH_THREE_BITS_AFTER_OPCODE  EQU $230
-DATA_SIZE                       EQU $240
-CURRENT_ADDR                    EQU $250
+HEXBITS                         EQU $2760
+FIRST_THREE_BITS_AFTER_OPCODE   EQU $2770
+SECOND_THREE_BITS_AFTER_OPCODE  EQU $2780
+THIRD_THREE_BITS_AFTER_OPCODE   EQU $2790
+FOURTH_THREE_BITS_AFTER_OPCODE  EQU $2800
+DATA_SIZE                       EQU $2810
+CURRENT_ADDR                    EQU $2820
 
 CR                              EQU $0D               
 LF                              EQU $0A
@@ -1886,6 +1886,7 @@ Invalid_EA      DC.B    '$WXYZ', 0
 CURR_ADDRESS    DS.B    30       ; Initialize and declare the current address
 
                 END    START
+
 
 *~Font name~Courier New~
 *~Font size~10~
