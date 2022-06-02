@@ -87,20 +87,18 @@ PAGE_SCAN_LOOP
                 
                 MOVE.L         #CURR_ADDRESS, A5
                 MOVE.L         D5,  D3
-                ;JSR            PRINT_MEM_ADDR                * PRINT CURRENT ADDRESS
                 MOVE.B         #0, (A5)+
                 JSR            DISPLAY
                 MOVEA.L        D5, A2
-                MOVE.W         (A2), D3
                 
                 
-                BRA            MAIN
+                BRA            READ_OPCODE
                 
 INCRE_LINE      LEA STR_SPACE ,A1
                 MOVE.B  #14,D0
                 TRAP    #15
 
-                ADD.L   #$2, D5         ;Increment this BY 2
+                MOVE.L   A2, D5         ;Increment this BY 2
         
                 ;MOVE.L  #$2, StartAddr
                 ADD.B   #1, D7          ;Increment the amount of lines displayed by 1
@@ -360,6 +358,7 @@ ADDA_OPCODE
                 TRAP            #15
                 
                 JSR             PRINT_ADDA_SIZE_CODE
+                JSR             PRINT_SPACE
                 
                 BRA             P_ADDA_EA
 
@@ -817,24 +816,21 @@ P_INVALID_EA
                 MOVE.B #14, D0
                 TRAP #15
   
-                MOVE.W            HEXBITS, D3
-                JSR               HEX_TO_STRING
-              
                 BRA         INSTRUC_DONE
 P_ADD_EA  
-                CMP.B       #1, D2                                          * CHECK WHICH OPMODE
-                BEQ         P_ADD_DnFIRST_EA                                * Dn + < ea > -> < ea >
+              CMP.B       #1, D2                                          * CHECK WHICH OPMODE
+              BEQ         P_ADD_DnFIRST_EA                                * Dn + < ea > -> < ea >
               
-                MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1               * EA MODE , <EA> + Dn -> Dn
-                MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
-                MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE       
-                JSR         EA_MODE_TABLE
-                JSR         COMMA_PRINT
+              MOVE.W      THIRD_THREE_BITS_AFTER_OPCODE, D1               * EA MODE , <EA> + Dn -> Dn
+              MOVE.W      FOURTH_THREE_BITS_AFTER_OPCODE, D4
+              MOVE.W      SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE       
+              JSR         EA_MODE_TABLE
+              JSR         COMMA_PRINT
               
-                MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4   
-                JSR         Dn_Mode_Print
+              MOVE.W      FIRST_THREE_BITS_AFTER_OPCODE, D4   
+              JSR         Dn_Mode_Print
               
-                BRA         INSTRUC_DONE
+              BRA         INSTRUC_DONE
               
 P_ADD_DnFIRST_EA                        * Dn + < ea > -> < ea >
 
@@ -852,8 +848,8 @@ P_ADD_DnFIRST_EA                        * Dn + < ea > -> < ea >
                 
 P_ADDA_EA                         * ADDA <EA>, AN
                
+                MOVE.W     THIRD_THREE_BITS_AFTER_OPCODE, D1
                 MOVE.W     FOURTH_THREE_BITS_AFTER_OPCODE, D4
-                MOVE.L     THIRD_THREE_BITS_AFTER_OPCODE, D1
                 MOVE.W     SECOND_THREE_BITS_AFTER_OPCODE, DATA_SIZE
                 JSR        EA_MODE_TABLE
                 
@@ -979,9 +975,8 @@ P_MOVEQ_EA
                 TRAP       #15
                 
                 MOVE.W      HEXBITS, D3
-                AND.W       #$00FF,D3                * GET RID OF THE FIRST 8 BITS
                 CLR.L         D1
-                MOVE.W      D3, D1
+                MOVE.B      D3, D1
                 
                 
                 JSR         PRINT_IMMEDIATE
@@ -1050,8 +1045,10 @@ P_MOVEAL_EA
 P_BCC_BRA_EA
                 CLR.B       D2
                 CLR.B       D3
+                CLR.L       D1
                 MOVE.W      HEXBITS, D1
-                AND.L       #$000000FF, D1              * GET RID OF ALL BITS EXCEPT DISPLACEMENT                    
+                LSL.W       #8, D1
+                LSR.W       #8, D1                    
                 CMP.B       #$00, D1
                 BEQ         BRA_HELPER_16BITS              
                 CMP.B       #$FF, D1
@@ -1306,8 +1303,8 @@ ABS_S_PRINT                                       * It specifies a 16 bit addres
                 MOVE.B #14, D0
                 TRAP #15
                 
+                CLR.L   D1
                 MOVE.W (A2)+, D1                   * MOVE THE CONTENT OF ADDRESS A2 TO D1 ( IN WORD SIZE)
-                AND.L  #$00FF, D1
 
                 JSR TRAP_PRINT                    * JUMP TO SUB ROUNTINE TO PRINT OUT THE TRAP
                 CLR.L D1                            * CLEAR D1 TO 0
@@ -1790,7 +1787,7 @@ E		        LEA		        STRINGE, A1
 F   		    LEA		        STRINGF, A1
 			    BRA		        PRINT_NUM
 			    
-RULE            DC.B 'Wellcome! This is a dissasembler program from group 4', CR, LF
+RULE            DC.B 'Welcome! This is a dissambler program from group 4', CR, LF
                 DC.B 'This is some information to enter a valid input:', CR, LF
                 DC.B 'Address entered need to be in hexadecimal and in a longword', CR, LF
                 DC.B 'Starting memory address must be greater or less than $0x1000', CR, LF
